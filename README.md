@@ -8,13 +8,11 @@ AIM : To convert the /Document/Accounts.xlsm to simple application to allow more
   - Payment CRUD
   - Income CRUD
   - Reporting
-  
-
-Application layer
 
 Frontend - 
   - ReactJs
-Backend - 
+  
+Backend 
   - API using .Net 
   - SQL Server as  DB
   
