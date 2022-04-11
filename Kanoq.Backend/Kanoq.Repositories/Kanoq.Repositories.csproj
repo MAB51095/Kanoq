@@ -53,6 +53,8 @@
     <Compile Include="Client.cs">
       <DependentUpon>KanoqModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Common\Repository.cs" />
+    <Compile Include="Common\IRepository.cs" />
     <Compile Include="KanoqModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -103,6 +105,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
