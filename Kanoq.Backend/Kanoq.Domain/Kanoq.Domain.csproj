@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{079FF472-716C-4AAE-8077-14D64590B959}</ProjectGuid>
+    <ProjectGuid>{CBD352AE-8D68-4360-AF28-84DA7AD85844}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Kanoq.BLL</RootNamespace>
-    <AssemblyName>Kanoq.BLL</AssemblyName>
+    <RootNamespace>Kanoq.Domain</RootNamespace>
+    <AssemblyName>Kanoq.Domain</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -31,12 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AutoMapper, Version=2.2.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoMapper.2.2.1\lib\net40\AutoMapper.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -45,28 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Managers\ClientManager.cs" />
-    <Compile Include="Interfaces\IClientManager.cs" />
-    <Compile Include="Map.cs" />
+    <Compile Include="Model.cs" />
+    <Compile Include="Tailor.cs" />
+    <Compile Include="Client.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Kanoq.DAL\Kanoq.DAL.csproj">
-      <Project>{DBA73C39-B0E7-484A-B112-715CB2286845}</Project>
-      <Name>Kanoq.DAL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Kanoq.Domain\Kanoq.Domain.csproj">
-      <Project>{cbd352ae-8d68-4360-af28-84da7ad85844}</Project>
-      <Name>Kanoq.Domain</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Kanoq.Repositories\Kanoq.Repositories.csproj">
-      <Project>{4ef1d1d5-4f45-4ad3-83ed-8249214987ae}</Project>
-      <Name>Kanoq.Repositories</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

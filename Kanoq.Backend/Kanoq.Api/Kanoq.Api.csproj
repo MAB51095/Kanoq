@@ -16,7 +16,7 @@
     <AssemblyName>Kanoq.Api</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44346</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
@@ -231,6 +231,10 @@
       <Project>{DBA73C39-B0E7-484A-B112-715CB2286845}</Project>
       <Name>Kanoq.DAL</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Kanoq.Domain\Kanoq.Domain.csproj">
+      <Project>{cbd352ae-8d68-4360-af28-84da7ad85844}</Project>
+      <Name>Kanoq.Domain</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Kanoq.Repositories\Kanoq.Repositories.csproj">
       <Project>{4EF1D1D5-4F45-4AD3-83ED-8249214987AE}</Project>
       <Name>Kanoq.Repositories</Name>
@@ -254,7 +258,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>54910</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44346/</IISUrl>
+          <IISUrl>http://localhost/Kanoq.Api</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

@@ -1,4 +1,5 @@
 ﻿using Kanoq.Api.App_Start;
+using Kanoq.BLL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ namespace Kanoq.Api
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             SimpleInjectorConfig.RegisterComponents();
+            Map.Initialize();
         }
     }
 }

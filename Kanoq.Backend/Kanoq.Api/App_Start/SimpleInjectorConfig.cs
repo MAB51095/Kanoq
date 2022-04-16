@@ -1,5 +1,6 @@
 ﻿using Kanoq.BLL;
 using Kanoq.BLL.Interfaces;
+using Kanoq.BLL.Managers;
 using Kanoq.DAL;
 using Kanoq.DAL.Interfaces;
 using Kanoq.Repositories.Generic;

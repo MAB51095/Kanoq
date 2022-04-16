@@ -1,4 +1,5 @@
-﻿using Kanoq.BLL.Interfaces;
+﻿using AutoMapper;
+using Kanoq.BLL.Interfaces;
 using Kanoq.DAL;
 using Kanoq.Repositories;
 using Kanoq.Repositories.Generic;
@@ -7,8 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain = Kanoq.Domain;
 
-namespace Kanoq.BLL
+namespace Kanoq.BLL.Managers
 {
     public class ClientManager : IClientManager
     {
@@ -17,9 +19,10 @@ namespace Kanoq.BLL
         {
             UnitOfWork = unitOfWork;            
         }
-        public IList<Client> GetClients()
+        public IList<Domain.Client> GetClients()
         {
-            return UnitOfWork.Clients.GetAll().ToList();
+            var clients = UnitOfWork.Clients.GetAll().ToList();
+            return Mapper.Map<List<Client>, List<Domain.Client>>(clients);
         }
     }
 }

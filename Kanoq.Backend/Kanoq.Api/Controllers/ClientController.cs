@@ -1,6 +1,6 @@
 ﻿using Kanoq.BLL;
 using Kanoq.BLL.Interfaces;
-using Kanoq.DAL;
+using Kanoq.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
