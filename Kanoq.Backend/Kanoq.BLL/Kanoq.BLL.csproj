@@ -46,6 +46,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Kanoq.DAL\Kanoq.DAL.csproj">
+      <Project>{DBA73C39-B0E7-484A-B112-715CB2286845}</Project>
+      <Name>Kanoq.DAL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Kanoq.Repositories\Kanoq.Repositories.csproj">
       <Project>{4ef1d1d5-4f45-4ad3-83ed-8249214987ae}</Project>
       <Name>Kanoq.Repositories</Name>
