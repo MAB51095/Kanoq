@@ -17,7 +17,7 @@ namespace Kanoq.Repositories.Generic
             _entities = context.Set<TEntity>();
         }
 
-        public TEntity Get(int id)
+        public TEntity Get(Guid id)
         {            
             return _entities.Find(id);
         }
@@ -31,7 +31,12 @@ namespace Kanoq.Repositories.Generic
         {
             return _entities.Where(predicate);
         }
-                
+
+        public TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate)
+        {
+            return _entities.SingleOrDefault(predicate);
+        }
+
         public void Add(TEntity entity)
         {
             _entities.Add(entity);

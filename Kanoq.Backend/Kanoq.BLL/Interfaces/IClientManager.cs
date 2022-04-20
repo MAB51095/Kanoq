@@ -10,5 +10,6 @@ namespace Kanoq.BLL.Interfaces
     public interface IClientManager
     {
         IList<Client> GetClients();
+        Client GetClient(Guid id);
     }
 }

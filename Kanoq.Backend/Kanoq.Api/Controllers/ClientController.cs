@@ -1,6 +1,8 @@
 ﻿using Kanoq.BLL;
 using Kanoq.BLL.Interfaces;
 using Kanoq.Domain;
+using Microsoft.Ajax.Utilities;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,10 +21,16 @@ namespace Kanoq.Api.Controllers
         {
             ClientManager = clientManager;
         }
-        public IEnumerable<Client> Get()
+        public IHttpActionResult Get()
         {
-            var clients = ClientManager.GetClients();
-            return clients;
+          var clients = ClientManager.GetClients();
+          return Ok(clients);                    
+        }
+        [HttpPost]
+        public IHttpActionResult Get([FromUri] Guid id)
+        {
+            var client = ClientManager.GetClient(id);
+            return Ok(client);
         }
     }
 }

@@ -24,5 +24,12 @@ namespace Kanoq.BLL.Managers
             var clients = UnitOfWork.Clients.GetAll().ToList();
             return Mapper.Map<List<Client>, List<Domain.Client>>(clients);
         }
+
+        public Domain.Client GetClient(Guid id)
+        {
+            var client = UnitOfWork.Clients.SingleOrDefault(c=>c.Id==id);
+            return Mapper.Map<Client, Domain.Client>(client);
+        }
+
     }
 }

@@ -9,5 +9,3 @@ Post-Deployment Script Template
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
-:r '..\Login\KanoqApiUser.login.sql'
-:r '..\Users\KanoqApiUser.user.sql'
