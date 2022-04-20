@@ -60,10 +60,21 @@
     <Folder Include="Properties" />
     <Folder Include="dbo\" />
     <Folder Include="dbo\Tables\" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\Users" />
+    <Folder Include="Scripts\Login" />
+    <Folder Include="Scripts\Deployment" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Client.sql" />
     <Build Include="dbo\Tables\Tailor.sql" />
     <Build Include="dbo\Tables\Model.sql" />
+    <Build Include="Scripts\Login\KanoqApiUser.login.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\Deployment\Script.PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\Users\KanoqApiUser.user.sql" />
   </ItemGroup>
 </Project>

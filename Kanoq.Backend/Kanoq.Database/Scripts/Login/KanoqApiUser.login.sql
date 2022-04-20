@@ -1,0 +1,1 @@
+﻿Create Login KanoqApiUser with password = 'DevAreGreat' 
