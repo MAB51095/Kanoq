@@ -13,7 +13,8 @@ Frontend -
   - ReactJs
   
 Backend 
-  - API using .Net 
+  - API using .Net MVC 5
+  - Entity Framework 6
   - SQL Server as  DB
   
 
