@@ -9,9 +9,7 @@ namespace Kanoq.Domain
 {
     public class Model
     {
-        [ScaffoldColumn(false)]
         public Guid Id { get; set; }
-        [Required]
         public string Name { get; set; }    
     }
 }

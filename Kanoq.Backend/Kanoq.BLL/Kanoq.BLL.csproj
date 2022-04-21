@@ -45,6 +45,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Interfaces\IModelManager.cs" />
+    <Compile Include="Interfaces\ITailorManager.cs" />
+    <Compile Include="Managers\ModelManager.cs" />
+    <Compile Include="Managers\TailorManager.cs" />
     <Compile Include="Managers\ClientManager.cs" />
     <Compile Include="Interfaces\IClientManager.cs" />
     <Compile Include="Map.cs" />

@@ -24,6 +24,8 @@ namespace Kanoq.Api.App_Start
 
             container.Register<IKanoqDbContext, KanoqDbContext>(Lifestyle.Scoped);
             container.Register<IUnitOfWork, UnitOfWork>(Lifestyle.Scoped);
+            container.Register<IModelManager, ModelManager>(Lifestyle.Scoped);
+            container.Register<ITailorManager, TailorManager>(Lifestyle.Scoped);
             container.Register<IClientManager, ClientManager>(Lifestyle.Scoped);
             container.RegisterWebApiControllers(GlobalConfiguration.Configuration);
 
