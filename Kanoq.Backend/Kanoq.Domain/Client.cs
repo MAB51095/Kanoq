@@ -9,10 +9,7 @@ namespace Kanoq.Domain
 {
     public class Client
     {
-
-        [ScaffoldColumn(false)]
         public System.Guid Id { get; set; }
-        [Required]
         public string Name { get; set; }
         public string PhoneNumber { get; set; }
         public string Email { get; set; }

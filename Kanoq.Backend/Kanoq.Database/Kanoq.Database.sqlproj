@@ -76,5 +76,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Users\KanoqApiUser.user.sql" />
+    <None Include="Kanoq.Database.publish.xml" />
   </ItemGroup>
 </Project>
