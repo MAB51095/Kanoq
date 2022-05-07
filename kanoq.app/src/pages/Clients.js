@@ -16,25 +16,29 @@ import {
   MDBModalFooter,
   MDBInput,
 } from "mdbreact";
-import { useState, React, useRef } from "react";
+import { useState, React, useRef, useEffect } from "react";
 import { setConstantValue } from "typescript";
 import SectionContainer from "../components/sectionContainer";
+import kanoqApiClient, { uri } from "../helper/Api/kanoqApiClient";
 
 function Clients() {
-  const fetchedData = [
-    {
-      Id: "d9ffb8f9-9f58-430c-bd29-afb9bc92843b",
-      Name: "Wildcraft",
-      PhoneNumber: null,
-      Email: null,
-    },
-    {
-      Id: "c9ffb8f9-9f58-430c-bd29-afb9bc92843c",
-      Name: "American Express",
-      PhoneNumber: null,
-      Email: null,
-    },
-  ]; //Call Get All Client API here in useEffect
+  const [clients, setClients] = useState([]);
+
+  const transformData = (clients) => {
+    return clients.map((data) => {
+      data = {
+        ...data,
+        Action: ActionButtons(data.Id),
+      };
+      return data;
+    });
+  };
+
+  useEffect(async () => {
+    let fetchedData = (await kanoqApiClient.get(uri.client.getAll)).data;
+
+    setClients(transformData(fetchedData));
+  }, []);
 
   function getid() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
@@ -51,7 +55,7 @@ function Clients() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   //IsUpdateModalOpen state here
 
-  const ActionItems = (id) => {
+  const ActionButtons = (id) => {
     return (
       <>
         <button onClick={() => Remove(id)}>Remove</button>
@@ -69,12 +73,22 @@ function Clients() {
       const state = clients;
       const id = getid(); // will use the id from API call response
 
+      // let client = {
+      //   Name: nameRef.current.value,
+      //   PhoneNumber: phoneNumberRef.current.value,
+      //   Email: emailRef.current.value,
+      // };
+
+      // let response = await kanoqApiClient.post(uri.client.insert, client);
+
+      // console.log(response.data);
+
       state.push({
         Id: id,
         Name: nameRef.current.value,
         PhoneNumber: phoneNumberRef.current.value,
         Email: emailRef.current.value,
-        Action: ActionItems(id),
+        Action: ActionButtons(id),
       });
 
       return state;
@@ -92,12 +106,10 @@ function Clients() {
       Name: "Updated",
     };
     setClients((clients) => {
-      const removeClient = clients.filter((client) => client.Id !== id);
-      const update = [...removeClient, updateClient];
+      let removeClient = clients.filter((client) => client.Id !== id);
+      let update = [...removeClient, updateClient];
 
-      //   const update = [...clients, updateClient];
-
-      return update;
+      return transformData(update);
     });
   };
 
@@ -105,16 +117,6 @@ function Clients() {
     //Call Delete Client API  here
     setClients((clients) => clients.filter((client) => client.Id !== id));
   };
-
-  const [clients, setClients] = useState(
-    fetchedData.map((data) => {
-      data = {
-        ...data,
-        Action: ActionItems(data.Id),
-      };
-      return data;
-    })
-  );
 
   const ToggleAddModal = () => {
     setIsAddModalOpen((state) => !state);
