@@ -16,7 +16,7 @@ import {
   MDBModalFooter,
   MDBInput,
 } from "mdbreact";
-import { useState, React, useRef, useEffect } from "react";
+import { useState, React, useRef, useEffect, useReducer } from "react";
 import { setConstantValue } from "typescript";
 import SectionContainer from "../components/sectionContainer";
 import kanoqApiClient, { uri } from "../helper/Api/kanoqApiClient";
@@ -53,7 +53,101 @@ function Clients() {
   const phoneNumberRef = useRef("");
   const emailRef = useRef("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  //IsUpdateModalOpen state here
+
+  const modalInitialState = {
+    Id: "",
+    Name: "",
+    PhoneNumber: "",
+    Email: "",
+    IsOpen: false,
+    Header: null,
+    Mode: null,
+  };
+
+  const modalActions = {
+    ADD: "ADD",
+    UPDATE: "UPDATE",
+
+    CANCEL: "CANCEL",
+    ON_CHANGE: "ON_CHANGE",
+
+    OPEN_AS_ADD: "OPEN_AS_ADD",
+    OPEN_AS_UPDATE: "OPEN_AS_UPDATE",
+  };
+
+  const modalReducer = (state, action) => {
+    switch (action.type) {
+      case modalActions.UPDATE:
+        return modalInitialState;
+        break;
+      case modalActions.CANCEL:
+        return modalInitialState;
+        break;
+      case modalActions.ON_CHANGE:
+        switch (action.id.toLowerCase()) {
+          case "name":
+            return { ...state, Name: action.val };
+            break;
+          case "phonenumber":
+            return { ...state, PhoneNumber: action.val };
+            break;
+          case "email":
+            return { ...state, Email: action.val };
+            break;
+        }
+        break;
+      case modalActions.OPEN_AS_ADD:
+        return { ...state, IsOpen: true, Header: "Add", Mode: "Add" };
+        break;
+      case modalActions.OPEN_AS_UPDATE:
+        return { ...state, IsOpen: true, Header: "Update", Mode: "Update" };
+        break;
+      case modalActions.CANCEL:
+        return { ...state, IsOpen: false };
+        break;
+      case modalActions.ADD:
+        setClients((clients) => {
+          const clientState = clients;
+          const id = getid(); // will use the id from API call response
+
+          // let client = {
+          //   Name: nameRef.current.value,
+          //   PhoneNumber: phoneNumberRef.current.value,
+          //   Email: emailRef.current.value,
+          // };
+
+          // let response = await kanoqApiClient.post(uri.client.insert, client);
+
+          // console.log(response.data);
+
+          clientState.push({
+            Id: id,
+            Name: state.Name,
+            PhoneNumber: state.PhoneNumber,
+            Email: state.Email,
+            Action: ActionButtons(id),
+          });
+
+          return clientState;
+        });
+        return modalInitialState;
+        break;
+      default:
+        return state;
+    }
+  };
+  const [modalState, modalDispatch] = useReducer(
+    modalReducer,
+    modalInitialState
+  );
+
+  const OnChangeHandler = (event) => {
+    modalDispatch({
+      type: modalActions.ON_CHANGE,
+      id: event.target.id,
+      val: event.target.value,
+    });
+  };
 
   const ActionButtons = (id) => {
     return (
@@ -64,37 +158,49 @@ function Clients() {
     );
   };
 
-  const Add = (e) => {
+  const SubmitHandler = (e) => {
     e.preventDefault();
 
-    //Call Add CLient API here
+    // //Call Add CLient API here
 
-    setClients((clients) => {
-      const state = clients;
-      const id = getid(); // will use the id from API call response
+    // setClients((clients) => {
+    //   const state = clients;
+    //   const id = getid(); // will use the id from API call response
 
-      // let client = {
-      //   Name: nameRef.current.value,
-      //   PhoneNumber: phoneNumberRef.current.value,
-      //   Email: emailRef.current.value,
-      // };
+    //   // let client = {
+    //   //   Name: nameRef.current.value,
+    //   //   PhoneNumber: phoneNumberRef.current.value,
+    //   //   Email: emailRef.current.value,
+    //   // };
 
-      // let response = await kanoqApiClient.post(uri.client.insert, client);
+    //   // let response = await kanoqApiClient.post(uri.client.insert, client);
 
-      // console.log(response.data);
+    //   // console.log(response.data);
 
-      state.push({
-        Id: id,
-        Name: nameRef.current.value,
-        PhoneNumber: phoneNumberRef.current.value,
-        Email: emailRef.current.value,
-        Action: ActionButtons(id),
-      });
+    //   state.push({
+    //     Id: id,
+    //     Name: nameRef.current.value,
+    //     PhoneNumber: phoneNumberRef.current.value,
+    //     Email: emailRef.current.value,
+    //     Action: ActionButtons(id),
+    //   });
 
-      return state;
-    });
+    //   return state;
+    // });
 
-    setIsAddModalOpen(false);
+    // setIsAddModalOpen(false);
+    switch (modalState.Mode) {
+      case "Add":
+        modalDispatch({
+          type: modalActions.ADD,
+        });
+        break;
+      case "Update":
+        modalDispatch({
+          type: modalActions.UPDATE,
+        });
+        break;
+    }
   };
 
   const Update = (id) => {
@@ -118,8 +224,15 @@ function Clients() {
     setClients((clients) => clients.filter((client) => client.Id !== id));
   };
 
-  const ToggleAddModal = () => {
-    setIsAddModalOpen((state) => !state);
+  const OpenAdddModal = () => {
+    modalDispatch({
+      type: modalActions.OPEN_AS_UPDATE,
+    });
+  };
+  const CancelModal = () => {
+    modalDispatch({
+      type: modalActions.CANCEL,
+    });
   };
 
   //Implement ToggleUpdateModal() to call update
@@ -157,13 +270,13 @@ function Clients() {
     <>
       <MDBModal
         className="modal-notify modal-primary white-text"
-        isOpen={isAddModalOpen}
-        toggle={ToggleAddModal}
+        isOpen={modalState.IsOpen}
+        toggle={CancelModal}
       >
         <MDBModalHeader
           className="text-center"
           titleClass="w-100 font-weight-bold"
-          toggle={ToggleAddModal}
+          toggle={CancelModal}
         >
           Add Client
         </MDBModalHeader>
@@ -171,7 +284,7 @@ function Clients() {
           <MDBContainer>
             <MDBRow>
               <MDBCol md="12">
-                <form onSubmit={Add}>
+                <form onSubmit={SubmitHandler}>
                   <label
                     htmlFor="defaultFormRegisterNameEx"
                     className="grey-text"
@@ -182,7 +295,9 @@ function Clients() {
                     type="text"
                     id="name"
                     className="form-control"
-                    ref={nameRef}
+                    //ref={nameRef}
+                    text={modalState.Name}
+                    onChange={OnChangeHandler}
                   />
                   <br />
                   <label
@@ -195,7 +310,9 @@ function Clients() {
                     type="email"
                     id="email"
                     className="form-control"
-                    ref={emailRef}
+                    //ref={emailRef}
+                    text={modalState.Email}
+                    onChange={OnChangeHandler}
                   />
                   <br />
                   <label
@@ -208,7 +325,9 @@ function Clients() {
                     type="number"
                     id="phoneNumber"
                     className="form-control"
-                    ref={phoneNumberRef}
+                    //ref={phoneNumberRef}
+                    text={modalState.PhoneNumber}
+                    onChange={OnChangeHandler}
                   />
                   <br />
 
@@ -237,7 +356,7 @@ function Clients() {
                     <strong className="font-weight-bold">Clients</strong>
                   </h2>
 
-                  <MDBBtn color="primary" onClick={ToggleAddModal} size="sm">
+                  <MDBBtn color="primary" onClick={OpenAdddModal} size="sm">
                     <MDBIcon stack="1x" icon="plus" color="primary" size="2x" />
                   </MDBBtn>
                 </MDBRow>
