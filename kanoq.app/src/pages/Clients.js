@@ -16,13 +16,23 @@ import {
   MDBModalFooter,
   MDBInput,
 } from "mdbreact";
+
 import { useState, React, useRef, useEffect, useReducer } from "react";
 import { setConstantValue } from "typescript";
+import Loading from "../components/loading";
 import SectionContainer from "../components/sectionContainer";
 import kanoqApiClient, { uri } from "../helper/Api/kanoqApiClient";
 
 function Clients() {
-  const [clients, setClients] = useState([]);
+  //#region misc
+  const ActionButtons = (id) => {
+    return (
+      <>
+        <button onClick={() => Remove(id)}>Remove</button>
+        <button onClick={() => Update(id)}>Update</button>
+      </>
+    );
+  };
 
   const transformData = (clients) => {
     return clients.map((data) => {
@@ -34,12 +44,6 @@ function Clients() {
     });
   };
 
-  useEffect(async () => {
-    let fetchedData = (await kanoqApiClient.get(uri.client.getAll)).data;
-
-    setClients(transformData(fetchedData));
-  }, []);
-
   function getid() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
       (
@@ -47,12 +51,29 @@ function Clients() {
         (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
       ).toString(16)
     );
-  } //Remove when add client API is being called
+  }
+  //#endregion
+
+  //#region  state manaagement
+  const [clients, setClients] = useState([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDataLoading, setIsDataLoading] = useState(true);
 
   const nameRef = useRef("");
   const phoneNumberRef = useRef("");
   const emailRef = useRef("");
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  //#endregion
+
+  //#region reducers
+
+  const modalActions = {
+    ADD: "ADD",
+    UPDATE: "UPDATE",
+    CANCEL: "CANCEL",
+    ON_CHANGE: "ON_CHANGE",
+    OPEN_AS_ADD: "OPEN_AS_ADD",
+    OPEN_AS_UPDATE: "OPEN_AS_UPDATE",
+  };
 
   const modalInitialState = {
     Id: "",
@@ -62,17 +83,6 @@ function Clients() {
     IsOpen: false,
     Header: null,
     Mode: null,
-  };
-
-  const modalActions = {
-    ADD: "ADD",
-    UPDATE: "UPDATE",
-
-    CANCEL: "CANCEL",
-    ON_CHANGE: "ON_CHANGE",
-
-    OPEN_AS_ADD: "OPEN_AS_ADD",
-    OPEN_AS_UPDATE: "OPEN_AS_UPDATE",
   };
 
   const modalReducer = (state, action) => {
@@ -136,10 +146,56 @@ function Clients() {
         return state;
     }
   };
+
   const [modalState, modalDispatch] = useReducer(
     modalReducer,
     modalInitialState
   );
+
+  //#endregion
+
+  //#region intial setup
+
+  useEffect(async () => {
+    let fetchedData = (await kanoqApiClient.get(uri.client.getAll)).data;
+
+    setClients(transformData(fetchedData));
+    setIsDataLoading(false);
+  }, []);
+
+  const data = {
+    columns: [
+      {
+        label: "Name",
+        field: "Name",
+        sort: "asc",
+        width: 150,
+      },
+      {
+        label: "Phone Number",
+        field: "PhoneNumber",
+        sort: "asc",
+        width: 270,
+      },
+      {
+        label: "Email",
+        field: "Email",
+        sort: "asc",
+        width: 200,
+      },
+      {
+        label: "",
+        field: "Action",
+        sort: "asc",
+        width: 100,
+      },
+    ],
+    rows: clients,
+  };
+
+  //#endregion
+
+  //#region pageevent
 
   const OnChangeHandler = (event) => {
     modalDispatch({
@@ -147,15 +203,6 @@ function Clients() {
       id: event.target.id,
       val: event.target.value,
     });
-  };
-
-  const ActionButtons = (id) => {
-    return (
-      <>
-        <button onClick={() => Remove(id)}>Remove</button>
-        <button onClick={() => Update(id)}>Update</button>
-      </>
-    );
   };
 
   const SubmitHandler = (e) => {
@@ -226,46 +273,19 @@ function Clients() {
 
   const OpenAdddModal = () => {
     modalDispatch({
-      type: modalActions.OPEN_AS_UPDATE,
+      type: modalActions.OPEN_AS_ADD,
     });
   };
+
   const CancelModal = () => {
     modalDispatch({
       type: modalActions.CANCEL,
     });
   };
 
-  //Implement ToggleUpdateModal() to call update
+  //#endregion
 
-  const data = {
-    columns: [
-      {
-        label: "Name",
-        field: "Name",
-        sort: "asc",
-        width: 150,
-      },
-      {
-        label: "Phone Number",
-        field: "PhoneNumber",
-        sort: "asc",
-        width: 270,
-      },
-      {
-        label: "Email",
-        field: "Email",
-        sort: "asc",
-        width: 200,
-      },
-      {
-        label: "",
-        field: "Action",
-        sort: "asc",
-        width: 100,
-      },
-    ],
-    rows: clients,
-  };
+  //#region view
   return (
     <>
       <MDBModal
@@ -360,7 +380,11 @@ function Clients() {
                     <MDBIcon stack="1x" icon="plus" color="primary" size="2x" />
                   </MDBBtn>
                 </MDBRow>
-                <MDBDataTable striped bordered hover data={data} />
+                {isDataLoading ? (
+                  <Loading />
+                ) : (
+                  <MDBDataTable striped bordered hover data={data} />
+                )}
               </MDBCardBody>
             </MDBCol>
           </MDBRow>
@@ -368,6 +392,7 @@ function Clients() {
       </div>
     </>
   );
+  //#endregion
 }
 
 export default Clients;

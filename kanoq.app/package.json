@@ -14,7 +14,7 @@
   "scripts": {
     "start": "env-cmd -e dev react-scripts start",
     "start:prod": "env-cmd -e prod react-scripts start",
-    "build": "react-scripts build",
+    "build": "env-cmd -e dev react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "rename": "renamer --find App-clear.js --replace App.js ./src/App-clear.js && renamer --find style.css --replace index.css ./src/style.css ",
