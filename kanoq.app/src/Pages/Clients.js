@@ -9,16 +9,17 @@ import {
   Collapse,
   Container,
   Toast,
+  Alert,
+  InputGroup,
 } from "react-bootstrap";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
-import ApiClient, { uri } from "../Helpers/ApiClient";
-import Validator from "../Helpers/Validator";
 
-import "../Icons/Edit.svg";
+import ApiClient, { uri } from "../Helpers/ApiClient";
 
 function Clients() {
   //#region Client List
+
   const [clients, setClients] = useState([]);
 
   useEffect(() => {
@@ -43,6 +44,9 @@ function Clients() {
 
   const [isAddClientFormOpen, setIsAddClientFormOpen] = useState(false);
 
+  const [isAddClientFormValidated, setIsAddClientFormValidated] =
+    useState(false);
+
   const ToggleAddClientForm = (val) => {
     if (val) {
       setIsAddClientFormOpen(val);
@@ -57,8 +61,16 @@ function Clients() {
     });
   };
 
-  const AddClient = (e) => {
-    e.preventDefault();
+  const AddClient = (event) => {
+    event.preventDefault();
+
+    const isFormValid = event.currentTarget.checkValidity();
+    if (isFormValid === false) {
+      event.stopPropagation();
+    }
+
+    setIsAddClientFormValidated(true);
+    console.log(isFormValid);
 
     const InsertClient = async () => {
       var res = await ApiClient.post(uri.client.insert, addClientEntry);
@@ -68,18 +80,24 @@ function Clients() {
       });
     };
 
-    if (Validator(addClientEntry)) {
+    if (isFormValid) {
       InsertClient(addClientEntry);
+      setAddClientEntry(emptyAddClientEntry);
+      setIsAddClientFormValidated(false);
     } else {
     }
-    ToggleAddClientForm(false);
+  };
+
+  const ResetAddClientForm = () => {
     setAddClientEntry(emptyAddClientEntry);
+    ToggleAddClientForm(false);
+    setIsAddClientFormValidated(false);
   };
   //#endregion
 
   //#region Table Edit
 
-  const [showToast, setShowToast] = useState(false);
+  const [showToast, setShowToast] = useState(true);
 
   const beforeSaveCell = (row, cellName, cellValue) => {
     // if you dont want to save this editing, just return false to cancel it.
@@ -115,25 +133,6 @@ function Clients() {
 
   return (
     <>
-      <Toast
-        onClose={() => setShowToast(false)}
-        show={showToast}
-        animation={true}
-        delay={3000}
-        autohide
-        style={{
-          position: "fixed",
-          top: 0,
-          right: 0,
-        }}
-        bg="Danger"
-      >
-        <Toast.Header>
-          <strong className="mr-auto">Bootstrap</strong>
-        </Toast.Header>
-        <Toast.Body>Woohoo, you're reading this text in a Toast!</Toast.Body>
-      </Toast>
-
       <Container>
         <Row>
           <Col align="left">
@@ -145,66 +144,82 @@ function Clients() {
             </Button>
           </Col>
         </Row>
+        <Row></Row>
       </Container>
 
       <Collapse in={isAddClientFormOpen} dimension="height">
-        <Card className="p-3">
-          <Form>
+        <Card className="p-3 ">
+          <Form
+            id="addClientForm"
+            onSubmit={AddClient}
+            noValidate
+            validated={isAddClientFormValidated}
+          >
             <Row>
-              <Col sm="3">
+              <Form.Group className="m-1" controlId="Name" as={Col} sm="3">
                 <Form.Control
-                  className="m-1"
-                  type="text"
+                  stype="text"
                   placeholder="Name"
                   value={addClientEntry.Name}
                   onChange={onChangeHandler}
-                  id="Name"
+                  //id="Name"
+                  required
                 />
-              </Col>
-              <Col sm="3">
+                <Form.Control.Feedback type="invalid" align="left">
+                  * Mandatory
+                </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group className="m-1" controlId="Email" as={Col} sm="3">
                 <Form.Control
-                  className="m-1"
                   type="email"
                   placeholder="Email"
                   value={addClientEntry.Email}
                   onChange={onChangeHandler}
-                  id="Email"
+                  //id="Email"
                 />
-              </Col>
-              <Col sm="3">
+                <Form.Control.Feedback type="invalid" align="left">
+                  Enter Valid Email Id
+                </Form.Control.Feedback>
+              </Form.Group>
+
+              <Form.Group
+                className="m-1"
+                controlId="PhoneNumber"
+                as={Col}
+                sm="3"
+              >
                 <Form.Control
-                  className="m-1"
                   type="number"
                   placeholder="Phone Number"
                   value={addClientEntry.PhoneNumber}
                   onChange={onChangeHandler}
-                  id="PhoneNumber"
+                  //id="PhoneNumber"
+                  min={1000000000}
+                  max={9999999999}
                 />
-              </Col>
-              <Col className="m-auto" sm="3">
-                <Button
-                  className="m-1"
-                  variant="dark"
-                  type="submit"
-                  onClick={AddClient}
-                >
+                <Form.Control.Feedback type="invalid" align="left">
+                  Enter Valid Phone Number
+                </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group className="m-1" as={Col} sm="2">
+                <Button variant="dark" type="submit" className="m-1">
                   Add
                 </Button>
                 <Button
-                  className="m-1"
                   variant="dark"
                   type="reset"
-                  onClick={() => ToggleAddClientForm(false)}
+                  onClick={() => ResetAddClientForm(false)}
+                  className="m-1"
                 >
                   Cancel
                 </Button>
-              </Col>
+              </Form.Group>
             </Row>
           </Form>
         </Card>
       </Collapse>
 
-      <Card className="p-3">
+      <Card className="p-3 mt-1">
         <BootstrapTable
           data={clients}
           search
@@ -212,7 +227,6 @@ function Clients() {
           striped
           hover
           bordered
-          condensed
         >
           <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
             Id
