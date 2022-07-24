@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import {
   Card,
@@ -11,22 +11,44 @@ import {
   Toast,
   Alert,
   InputGroup,
+  ButtonGroup,
+  Spinner,
 } from "react-bootstrap";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 
 import ApiClient, { uri } from "../Helpers/ApiClient";
 
+import NotificationContext from "../store/NotificationContext";
+import { CreateErrorNotification } from "../Helpers/NotificationHelper";
+import { AppMap } from "../Helpers/AppMap";
+
 function Clients() {
+  const ctxNotification = useContext(NotificationContext);
+
   //#region Client List
 
   const [clients, setClients] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setIsLoading(true);
     async function GetClients() {
-      var data = (await ApiClient.get(uri.client.getAll)).data;
-      setClients(data);
+      try {
+        var data = (await ApiClient.get(uri.client.getAll)).data;
+        setClients(data);
+      } catch (e) {
+        ctxNotification.AddNotificationItem(
+          CreateErrorNotification(
+            e,
+            AppMap.Pages.CLIENTS,
+            AppMap.Actions.CLIENTS.LOAD_LIST
+          )
+        );
+        setIsLoading(false);
+      }
     }
+
     GetClients();
   }, []);
 
@@ -43,6 +65,8 @@ function Clients() {
   const [addClientEntry, setAddClientEntry] = useState(emptyAddClientEntry);
 
   const [isAddClientFormOpen, setIsAddClientFormOpen] = useState(false);
+
+  const [isAdding, setIsAdding] = useState(false);
 
   const [isAddClientFormValidated, setIsAddClientFormValidated] =
     useState(false);
@@ -63,35 +87,48 @@ function Clients() {
 
   const AddClient = (event) => {
     event.preventDefault();
+    setIsAdding(true);
 
     const isFormValid = event.currentTarget.checkValidity();
+
     if (isFormValid === false) {
       event.stopPropagation();
     }
 
     setIsAddClientFormValidated(true);
-    console.log(isFormValid);
 
     const InsertClient = async () => {
-      var res = await ApiClient.post(uri.client.insert, addClientEntry);
+      try {
+        var res = await ApiClient.post(uri.client.insert, addClientEntry);
 
-      setClients((prev) => {
-        return [res.data, ...prev];
-      });
+        setClients((prev) => {
+          return [res.data, ...prev];
+        });
+      } catch (e) {
+        ctxNotification.AddNotificationItem(
+          CreateErrorNotification(
+            e,
+            AppMap.Pages.CLIENTS,
+            AppMap.Actions.CLIENTS.ADD_NEW_CLIENT
+          )
+        );
+      }
     };
 
     if (isFormValid) {
       InsertClient(addClientEntry);
       setAddClientEntry(emptyAddClientEntry);
       setIsAddClientFormValidated(false);
-    } else {
     }
+
+    setIsAdding(false);
   };
 
   const ResetAddClientForm = () => {
     setAddClientEntry(emptyAddClientEntry);
     ToggleAddClientForm(false);
     setIsAddClientFormValidated(false);
+    setIsAdding(false);
   };
   //#endregion
 
@@ -162,8 +199,8 @@ function Clients() {
                   placeholder="Name"
                   value={addClientEntry.Name}
                   onChange={onChangeHandler}
-                  //id="Name"
                   required
+                  disabled={isAdding}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
                   * Mandatory
@@ -175,7 +212,7 @@ function Clients() {
                   placeholder="Email"
                   value={addClientEntry.Email}
                   onChange={onChangeHandler}
-                  //id="Email"
+                  disabled={isAdding}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
                   Enter Valid Email Id
@@ -196,23 +233,41 @@ function Clients() {
                   //id="PhoneNumber"
                   min={1000000000}
                   max={9999999999}
+                  disabled={isAdding}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
                   Enter Valid Phone Number
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="m-1" as={Col} sm="2">
-                <Button variant="dark" type="submit" className="m-1">
-                  Add
-                </Button>
-                <Button
-                  variant="dark"
-                  type="reset"
-                  onClick={() => ResetAddClientForm(false)}
-                  className="m-1"
-                >
-                  Cancel
-                </Button>
+                <ButtonGroup>
+                  <Button
+                    variant="dark"
+                    type="submit"
+                    className="m-1"
+                    disabled={isAdding}
+                  >
+                    {isAdding && (
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                      />
+                    )}
+                    Add
+                  </Button>
+                  <Button
+                    variant="dark"
+                    type="reset"
+                    onClick={() => ResetAddClientForm(false)}
+                    className="m-1"
+                    hidden={isAdding}
+                  >
+                    Cancel
+                  </Button>
+                </ButtonGroup>
               </Form.Group>
             </Row>
           </Form>

@@ -12,12 +12,15 @@ import "../node_modules/react-bootstrap-table/dist/react-bootstrap-table.min.js"
 // Bootstrap configuration
 import "../node_modules/react-bootstrap/dist/react-bootstrap";
 import "../node_modules/bootstrap/dist/css/bootstrap.css";
+import { NotificationContextProvider } from "./store/NotificationContext";
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <NotificationContextProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </NotificationContextProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );
