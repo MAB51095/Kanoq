@@ -22,6 +22,7 @@ import ApiClient, { uri } from "../Helpers/ApiClient";
 import NotificationContext from "../store/NotificationContext";
 import { CreateErrorNotification } from "../Helpers/NotificationHelper";
 import { AppMap } from "../Helpers/AppMap";
+import Modal from "../Components/Modal/Modal";
 
 function Clients() {
   const ctxNotification = useContext(NotificationContext);
@@ -56,13 +57,13 @@ function Clients() {
 
   //#region Add Client Form
 
-  const emptyAddClientEntry = {
+  const emptyClientEntry = {
     Name: "",
     Email: "",
     PhoneNumber: "",
   };
 
-  const [addClientEntry, setAddClientEntry] = useState(emptyAddClientEntry);
+  const [addClientEntry, setAddClientEntry] = useState(emptyClientEntry);
 
   const [isAddClientFormOpen, setIsAddClientFormOpen] = useState(false);
 
@@ -79,7 +80,7 @@ function Clients() {
     setIsAddClientFormOpen((prev) => !prev);
   };
 
-  const onChangeHandler = (e) => {
+  const onAddFormChangeHandler = (e) => {
     setAddClientEntry((prev) => {
       return { ...prev, [e.target.id]: e.target.value };
     });
@@ -117,7 +118,7 @@ function Clients() {
 
     if (isFormValid) {
       InsertClient(addClientEntry);
-      setAddClientEntry(emptyAddClientEntry);
+      setAddClientEntry(emptyClientEntry);
       setIsAddClientFormValidated(false);
     }
 
@@ -125,51 +126,202 @@ function Clients() {
   };
 
   const ResetAddClientForm = () => {
-    setAddClientEntry(emptyAddClientEntry);
+    setAddClientEntry(emptyClientEntry);
     ToggleAddClientForm(false);
     setIsAddClientFormValidated(false);
     setIsAdding(false);
   };
   //#endregion
 
-  //#region Table Edit
+  //#region Update Form
 
-  const [showToast, setShowToast] = useState(true);
+  const [updateClientEntry, setUpdateClientEntry] = useState(emptyClientEntry);
 
-  const beforeSaveCell = (row, cellName, cellValue) => {
-    // if you dont want to save this editing, just return false to cancel it.
-    setClients((prev) => {
-      prev.forEach((element) => {
-        if (element.id == row.id) {
-          element = { ...element, [cellName]: cellValue };
-        }
-      });
-      return prev;
+  const [isUpdateClientFormOpen, setIsUpdateClientFormOpen] = useState(false);
+
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const [isUpdateClientFormValidated, setIsUpdateClientFormValidated] =
+    useState(false);
+
+  const ToggleUpdateClientForm = (val) => {
+    if (val) {
+      setIsUpdateClientFormOpen(val);
+      return;
+    }
+    setIsUpdateClientFormOpen((prev) => !prev);
+  };
+
+  const onUpdateFormChangeHandler = (e) => {
+    setUpdateClientEntry((prev) => {
+      return { ...prev, [e.target.id]: e.target.value };
     });
-    console.log("state updated");
-    console.log("api call here");
-    setShowToast(true);
-
-    return true;
   };
 
-  const cellEditProp = {
-    mode: "dbclick",
-    beforeSaveCell,
+  const ResetUpdateClientForm = () => {
+    setUpdateClientEntry(emptyClientEntry);
+    ToggleUpdateClientForm(false);
+    setIsUpdateClientFormValidated(false);
+    setIsUpdating(false);
   };
 
-  const selectRow = {
-    mode: "dbclick",
-    clickToSelect: true,
+  const UpdateClient = (event) => {
+    event.preventDefault();
+    setIsUpdating(true);
+
+    const isFormValid = event.currentTarget.checkValidity();
+
+    if (isFormValid === false) {
+      event.stopPropagation();
+    }
+
+    setIsUpdateClientFormValidated(true);
+
+    const ModifyClient = async () => {
+      try {
+        var res = await ApiClient.post(uri.client.update, updateClientEntry);
+        console.log(res);
+
+        var updateClientId = updateClientEntry.Id;
+
+        setClients((prev) => {
+          var cl = prev.filter((c) => c.Id !== updateClientId);
+          cl.unshift(updateClientEntry);
+          return cl;
+        });
+      } catch (e) {
+        ctxNotification.AddNotificationItem(
+          CreateErrorNotification(
+            e,
+            AppMap.Pages.CLIENTS,
+            AppMap.Actions.CLIENTS.EDIT_CLIENT
+          )
+        );
+      }
+    };
+
+    if (isFormValid) {
+      ModifyClient();
+      ResetUpdateClientForm();
+    }
+
+    setIsUpdating(false);
   };
 
-  const onEdit = () => {
-    console.log("Edit Triggerd");
+  //#endregion
+
+  //#region Table Options
+
+  var options = {
+    onRowClick: function (row) {
+      setUpdateClientEntry(row);
+      ToggleUpdateClientForm(true);
+    },
   };
+
   //#endregion
 
   return (
     <>
+      <Modal visible={isUpdateClientFormOpen}>
+        <Card style={{ textAlign: "left" }}>
+          <Card.Header as="h5" variant="dark">
+            Update Client
+          </Card.Header>
+
+          <Card.Body>
+            <Form
+              id="updateClientForm"
+              onSubmit={UpdateClient}
+              noValidate
+              validated={isUpdateClientFormValidated}
+              className=""
+              style={{ minWidth: "300px" }}
+            >
+              <Form.Group className="p-1" controlId="Name">
+                <Form.Label>Name</Form.Label>
+
+                <Form.Control
+                  stype="text"
+                  placeholder="Name"
+                  value={updateClientEntry.Name}
+                  onChange={onUpdateFormChangeHandler}
+                  required
+                  disabled={isUpdating}
+                />
+                <Form.Control.Feedback type="invalid" align="left">
+                  * Mandatory
+                </Form.Control.Feedback>
+              </Form.Group>
+
+              <Form.Group className="p-1" controlId="Email">
+                <Form.Label>Email</Form.Label>
+
+                <Form.Control
+                  type="email"
+                  placeholder="Email"
+                  value={updateClientEntry.Email}
+                  onChange={onUpdateFormChangeHandler}
+                  disabled={isUpdating}
+                />
+                <Form.Control.Feedback type="invalid" align="left">
+                  Enter Valid Email Id
+                </Form.Control.Feedback>
+              </Form.Group>
+
+              <Form.Group className="p-1" controlId="PhoneNumber">
+                <Form.Label>Phone</Form.Label>
+
+                <Form.Control
+                  type="number"
+                  placeholder="Phone Number"
+                  value={updateClientEntry.PhoneNumber}
+                  onChange={onUpdateFormChangeHandler}
+                  //id="PhoneNumber"
+                  min={1000000000}
+                  max={9999999999}
+                  disabled={isUpdating}
+                />
+                <Form.Control.Feedback type="invalid" align="left">
+                  Enter Valid Phone Number
+                </Form.Control.Feedback>
+              </Form.Group>
+              <hr></hr>
+              <Form.Group className="m-1">
+                <ButtonGroup>
+                  <Button
+                    variant="dark"
+                    type="submit"
+                    className="m-1"
+                    disabled={isUpdating}
+                  >
+                    {isUpdating && (
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                      />
+                    )}
+                    Update
+                  </Button>
+                  <Button
+                    variant="dark"
+                    type="reset"
+                    onClick={() => ResetUpdateClientForm(false)}
+                    className="m-1"
+                    hidden={isUpdating}
+                  >
+                    Cancel
+                  </Button>
+                </ButtonGroup>
+              </Form.Group>
+            </Form>
+          </Card.Body>
+        </Card>
+      </Modal>
+
       <Container>
         <Row>
           <Col align="left">
@@ -198,7 +350,7 @@ function Clients() {
                   stype="text"
                   placeholder="Name"
                   value={addClientEntry.Name}
-                  onChange={onChangeHandler}
+                  onChange={onAddFormChangeHandler}
                   required
                   disabled={isAdding}
                 />
@@ -211,7 +363,7 @@ function Clients() {
                   type="email"
                   placeholder="Email"
                   value={addClientEntry.Email}
-                  onChange={onChangeHandler}
+                  onChange={onAddFormChangeHandler}
                   disabled={isAdding}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
@@ -229,7 +381,7 @@ function Clients() {
                   type="number"
                   placeholder="Phone Number"
                   value={addClientEntry.PhoneNumber}
-                  onChange={onChangeHandler}
+                  onChange={onAddFormChangeHandler}
                   //id="PhoneNumber"
                   min={1000000000}
                   max={9999999999}
@@ -278,10 +430,10 @@ function Clients() {
         <BootstrapTable
           data={clients}
           search
-          cellEdit={cellEditProp}
           striped
           hover
           bordered
+          options={options}
         >
           <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
             Id

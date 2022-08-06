@@ -5,7 +5,8 @@ export const baseURL = "http://localhost/Kanoq.Api";
 export const uri = {
   client: {
     getAll: "client/get",
-    insert: "Client/insert",
+    insert: "client/insert",
+    update: "client/update",
   },
 };
 
