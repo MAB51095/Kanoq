@@ -303,7 +303,7 @@ function Clients() {
                   <Button
                     variant="primary"
                     type="submit"
-                    className="m-1"
+                    className="m-1 shadow-lg"
                     disabled={isAdding}
                   >
                     {isAdding && (
@@ -321,7 +321,7 @@ function Clients() {
                     variant="secondary"
                     type="reset"
                     onClick={() => ResetAddClientForm(false)}
-                    className="m-1"
+                    className="m-1 shadow-lg"
                     hidden={isAdding}
                   >
                     Cancel
@@ -335,9 +335,7 @@ function Clients() {
 
       <Modal visible={isUpdateClientFormOpen}>
         <Card style={{ textAlign: "left" }} className="shadow-lg">
-          <Card.Header as="h5" variant="dark">
-            Edit Client
-          </Card.Header>
+          <Card.Header as="h5">Edit Client</Card.Header>
 
           <Card.Body>
             <Form
@@ -402,7 +400,7 @@ function Clients() {
                   <Button
                     variant="primary"
                     type="submit"
-                    className="m-1"
+                    className="m-1 shadow-lg"
                     disabled={isUpdating}
                   >
                     {isUpdating && (
@@ -420,7 +418,7 @@ function Clients() {
                     variant="secondary"
                     type="reset"
                     onClick={() => ResetUpdateClientForm(false)}
-                    className="m-1"
+                    className="m-1 shadow-lg"
                     hidden={isUpdating}
                   >
                     Cancel
