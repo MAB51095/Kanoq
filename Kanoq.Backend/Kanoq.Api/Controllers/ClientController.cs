@@ -1,4 +1,5 @@
 ﻿using Kanoq.BLL;
+using Kanoq.BLL.Helper;
 using Kanoq.BLL.Interfaces;
 using Kanoq.Domain;
 using Microsoft.Ajax.Utilities;
@@ -22,12 +23,20 @@ namespace Kanoq.Api.Controllers
         {
             ClientManager = clientManager;
         }
+
         [Route("get")]
         [HttpGet]
         public IHttpActionResult Get()
-        {
-          var clients = ClientManager.Get();
-          return Ok(clients);                    
+        {          
+            try
+            {
+                var clients = ClientManager.Get();
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
+            }
         }
 
         [Route("get/{id}")]
@@ -49,7 +58,7 @@ namespace Kanoq.Api.Controllers
             }
             catch(Exception ex)
             {
-                return Content(HttpStatusCode.InternalServerError, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
             
         }
@@ -65,7 +74,7 @@ namespace Kanoq.Api.Controllers
             }
             catch (Exception ex)
             {
-                return Content(HttpStatusCode.InternalServerError, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
         }
 
@@ -80,7 +89,7 @@ namespace Kanoq.Api.Controllers
             }
             catch(Exception ex)
             {
-                return Content(HttpStatusCode.BadRequest, ex);
+                return Content(HttpStatusCode.BadRequest, ExceptionHelper.GetExcpetionMessage(ex));
             }
         }
     }

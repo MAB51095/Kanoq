@@ -30,10 +30,10 @@ function Clients() {
   //#region Client List
 
   const [clients, setClients] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isListLoading, setIsListLoading] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
+    setIsListLoading(true);
     async function GetClients() {
       try {
         var data = (await ApiClient.get(uri.client.getAll)).data;
@@ -46,8 +46,8 @@ function Clients() {
             AppMap.Actions.CLIENTS.LOAD_LIST
           )
         );
-        setIsLoading(false);
       }
+      setIsListLoading(false);
     }
 
     GetClients();
@@ -122,7 +122,9 @@ function Clients() {
       setIsAddClientFormValidated(false);
     }
 
-    setIsAdding(false);
+    setTimeout(() => {
+      setIsAdding(false);
+    }, 500);
   };
 
   const ResetAddClientForm = () => {
@@ -167,6 +169,7 @@ function Clients() {
 
   const UpdateClient = (event) => {
     event.preventDefault();
+    setIsUpdateClientFormValidated(false);
     setIsUpdating(true);
 
     const isFormValid = event.currentTarget.checkValidity();
@@ -189,7 +192,9 @@ function Clients() {
           cl.unshift(updateClientEntry);
           return cl;
         });
+        ResetUpdateClientForm();
       } catch (e) {
+        setIsUpdating(false);
         ctxNotification.AddNotificationItem(
           CreateErrorNotification(
             e,
@@ -202,10 +207,11 @@ function Clients() {
 
     if (isFormValid) {
       ModifyClient();
-      ResetUpdateClientForm();
     }
 
-    setIsUpdating(false);
+    setTimeout(() => {
+      setIsUpdating(false);
+    }, 500);
   };
 
   //#endregion
@@ -345,7 +351,7 @@ function Clients() {
             validated={isAddClientFormValidated}
           >
             <Row>
-              <Form.Group className="m-1" controlId="Name" as={Col} sm="3">
+              <Form.Group className="m-1" controlId="Name" as={Col} md="3">
                 <Form.Control
                   stype="text"
                   placeholder="Name"
@@ -358,7 +364,7 @@ function Clients() {
                   * Mandatory
                 </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group className="m-1" controlId="Email" as={Col} sm="3">
+              <Form.Group className="m-1" controlId="Email" as={Col} md="3">
                 <Form.Control
                   type="email"
                   placeholder="Email"
@@ -375,7 +381,7 @@ function Clients() {
                 className="m-1"
                 controlId="PhoneNumber"
                 as={Col}
-                sm="3"
+                md="3"
               >
                 <Form.Control
                   type="number"
@@ -427,41 +433,56 @@ function Clients() {
       </Collapse>
 
       <Card className="p-3 mt-1">
-        <BootstrapTable
-          data={clients}
-          search
-          striped
-          hover
-          bordered
-          options={options}
-        >
-          <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
-            Id
-          </TableHeaderColumn>
-          <TableHeaderColumn
-            dataField="Name"
-            dataSort
-            editable={{ type: "text" }}
-            editColumnClassName="editing-jobsname-class"
-            invalidEditColumnClassName="invalid-jobsname-class"
+        {isListLoading && (
+          <Container>
+            <Spinner
+              as="span"
+              animation="border"
+              size="lg"
+              role="status"
+              aria-hidden="true"
+            />
+          </Container>
+        )}
+        {!isListLoading && (
+          <BootstrapTable
+            data={clients}
+            search
+            striped
+            hover
+            bordered
+            options={options}
+            pagination={true}
           >
-            Name
-          </TableHeaderColumn>
-          <TableHeaderColumn
-            dataField="PhoneNumber"
-            dataSort
-            editable={{ type: "number" }}
-          >
-            Phone Number
-          </TableHeaderColumn>
-          <TableHeaderColumn
-            dataField="Email"
-            dataSort
-            editable={{ type: "email" }}
-          >
-            Email
-          </TableHeaderColumn>
-        </BootstrapTable>
+            <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
+              Id
+            </TableHeaderColumn>
+            <TableHeaderColumn
+              dataField="Name"
+              dataSort
+              editable={{ type: "text" }}
+              editColumnClassName="editing-jobsname-class"
+              invalidEditColumnClassName="invalid-jobsname-class"
+            >
+              Name
+            </TableHeaderColumn>
+
+            <TableHeaderColumn
+              dataField="Email"
+              dataSort
+              editable={{ type: "email" }}
+            >
+              Email
+            </TableHeaderColumn>
+            <TableHeaderColumn
+              dataField="PhoneNumber"
+              dataSort
+              editable={{ type: "number" }}
+            >
+              Phone Number
+            </TableHeaderColumn>
+          </BootstrapTable>
+        )}
       </Card>
     </>
   );

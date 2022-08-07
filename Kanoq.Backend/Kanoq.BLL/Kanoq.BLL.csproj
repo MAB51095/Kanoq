@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\ExceptionHelper.cs" />
     <Compile Include="Interfaces\IModelManager.cs" />
     <Compile Include="Interfaces\ITailorManager.cs" />
     <Compile Include="Managers\ModelManager.cs" />
