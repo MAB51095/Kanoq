@@ -10,7 +10,7 @@ function NotificationItem(props) {
   };
 
   return (
-    <Toast onClose={toggleShowA} bg={props.notify.bg}>
+    <Toast onClose={toggleShowA} bg={props.notify.bg} className="m-1 p-1">
       <Toast.Header>
         <strong className="m-auto">{props.notify.Page}</strong>
       </Toast.Header>

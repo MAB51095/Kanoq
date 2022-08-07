@@ -8,7 +8,7 @@ function Notifications() {
   const ctxNotifications = useContext(NotificationContext);
 
   return (
-    <ToastContainer>
+    <ToastContainer className="shadow-bg">
       {ctxNotifications.notificationItems.map((n) => {
         return <NotificationItem key={n.id} notify={n} />;
       })}

@@ -4,7 +4,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 function Header() {
   return (
-    <Navbar bg="dark" expand="lg" variant="dark">
+    <Navbar
+      bg="primary"
+      expand="lg"
+      variant="dark"
+      className="sticky-top shadow-lg"
+    >
       <Container>
         <Navbar.Brand href="#home">Kanoq</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

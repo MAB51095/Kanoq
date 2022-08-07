@@ -8,9 +8,6 @@ import {
   Form,
   Collapse,
   Container,
-  Toast,
-  Alert,
-  InputGroup,
   ButtonGroup,
   Spinner,
 } from "react-bootstrap";
@@ -229,10 +226,117 @@ function Clients() {
 
   return (
     <>
+      <Container>
+        <Row>
+          <Col align="left">
+            <h1>Clients</h1>
+          </Col>
+          <Col align="right">
+            <Button
+              onClick={() => ToggleAddClientForm()}
+              //variant="dark"
+            >
+              +
+            </Button>
+          </Col>
+        </Row>
+        <Row></Row>
+      </Container>
+
+      <Collapse in={isAddClientFormOpen} dimension="height">
+        <Card className="p-3  mb-2 shadow-lg">
+          <Form
+            id="addClientForm"
+            onSubmit={AddClient}
+            noValidate
+            validated={isAddClientFormValidated}
+          >
+            <Row>
+              <Form.Group className="m-1" controlId="Name" as={Col} md="3">
+                <Form.Control
+                  stype="text"
+                  placeholder="Name"
+                  value={addClientEntry.Name}
+                  onChange={onAddFormChangeHandler}
+                  required
+                  disabled={isAdding}
+                />
+                <Form.Control.Feedback type="invalid" align="left">
+                  * Mandatory
+                </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group className="m-1" controlId="Email" as={Col} md="3">
+                <Form.Control
+                  type="email"
+                  placeholder="Email"
+                  value={addClientEntry.Email}
+                  onChange={onAddFormChangeHandler}
+                  disabled={isAdding}
+                />
+                <Form.Control.Feedback type="invalid" align="left">
+                  Enter Valid Email Id
+                </Form.Control.Feedback>
+              </Form.Group>
+
+              <Form.Group
+                className="m-1"
+                controlId="PhoneNumber"
+                as={Col}
+                md="3"
+              >
+                <Form.Control
+                  type="number"
+                  placeholder="Phone Number"
+                  value={addClientEntry.PhoneNumber}
+                  onChange={onAddFormChangeHandler}
+                  //id="PhoneNumber"
+                  min={1000000000}
+                  max={9999999999}
+                  disabled={isAdding}
+                />
+                <Form.Control.Feedback type="invalid" align="left">
+                  Enter Valid Phone Number
+                </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group className="m-1" as={Col} sm="2">
+                <ButtonGroup>
+                  <Button
+                    variant="primary"
+                    type="submit"
+                    className="m-1"
+                    disabled={isAdding}
+                  >
+                    {isAdding && (
+                      <Spinner
+                        as="span"
+                        animation="border"
+                        size="sm"
+                        role="status"
+                        aria-hidden="true"
+                      />
+                    )}
+                    Add
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    type="reset"
+                    onClick={() => ResetAddClientForm(false)}
+                    className="m-1"
+                    hidden={isAdding}
+                  >
+                    Cancel
+                  </Button>
+                </ButtonGroup>
+              </Form.Group>
+            </Row>
+          </Form>
+        </Card>
+      </Collapse>
+
       <Modal visible={isUpdateClientFormOpen}>
-        <Card style={{ textAlign: "left" }}>
+        <Card style={{ textAlign: "left" }} className="shadow-lg">
           <Card.Header as="h5" variant="dark">
-            Update Client
+            Edit Client
           </Card.Header>
 
           <Card.Body>
@@ -296,7 +400,7 @@ function Clients() {
               <Form.Group className="m-1">
                 <ButtonGroup>
                   <Button
-                    variant="dark"
+                    variant="primary"
                     type="submit"
                     className="m-1"
                     disabled={isUpdating}
@@ -313,7 +417,7 @@ function Clients() {
                     Update
                   </Button>
                   <Button
-                    variant="dark"
+                    variant="secondary"
                     type="reset"
                     onClick={() => ResetUpdateClientForm(false)}
                     className="m-1"
@@ -328,111 +432,7 @@ function Clients() {
         </Card>
       </Modal>
 
-      <Container>
-        <Row>
-          <Col align="left">
-            <h1>Clients</h1>
-          </Col>
-          <Col align="right">
-            <Button variant="dark" onClick={() => ToggleAddClientForm()}>
-              +
-            </Button>
-          </Col>
-        </Row>
-        <Row></Row>
-      </Container>
-
-      <Collapse in={isAddClientFormOpen} dimension="height">
-        <Card className="p-3 ">
-          <Form
-            id="addClientForm"
-            onSubmit={AddClient}
-            noValidate
-            validated={isAddClientFormValidated}
-          >
-            <Row>
-              <Form.Group className="m-1" controlId="Name" as={Col} md="3">
-                <Form.Control
-                  stype="text"
-                  placeholder="Name"
-                  value={addClientEntry.Name}
-                  onChange={onAddFormChangeHandler}
-                  required
-                  disabled={isAdding}
-                />
-                <Form.Control.Feedback type="invalid" align="left">
-                  * Mandatory
-                </Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group className="m-1" controlId="Email" as={Col} md="3">
-                <Form.Control
-                  type="email"
-                  placeholder="Email"
-                  value={addClientEntry.Email}
-                  onChange={onAddFormChangeHandler}
-                  disabled={isAdding}
-                />
-                <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Email Id
-                </Form.Control.Feedback>
-              </Form.Group>
-
-              <Form.Group
-                className="m-1"
-                controlId="PhoneNumber"
-                as={Col}
-                md="3"
-              >
-                <Form.Control
-                  type="number"
-                  placeholder="Phone Number"
-                  value={addClientEntry.PhoneNumber}
-                  onChange={onAddFormChangeHandler}
-                  //id="PhoneNumber"
-                  min={1000000000}
-                  max={9999999999}
-                  disabled={isAdding}
-                />
-                <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Phone Number
-                </Form.Control.Feedback>
-              </Form.Group>
-              <Form.Group className="m-1" as={Col} sm="2">
-                <ButtonGroup>
-                  <Button
-                    variant="dark"
-                    type="submit"
-                    className="m-1"
-                    disabled={isAdding}
-                  >
-                    {isAdding && (
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                      />
-                    )}
-                    Add
-                  </Button>
-                  <Button
-                    variant="dark"
-                    type="reset"
-                    onClick={() => ResetAddClientForm(false)}
-                    className="m-1"
-                    hidden={isAdding}
-                  >
-                    Cancel
-                  </Button>
-                </ButtonGroup>
-              </Form.Group>
-            </Row>
-          </Form>
-        </Card>
-      </Collapse>
-
-      <Card className="p-3 mt-1">
+      <Card className="p-3 mt-1 shadow-lg">
         {isListLoading && (
           <Container>
             <Spinner
