@@ -11,20 +11,3 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
-
-#custom-notifications,
-.custom-notifications {
-  box-shadow: -20px 0rem 3rem 20px rgb(0 0 0 / 18%);
-  position: fixed;
-  z-index: 10000;
-  background-color: #f3f3f3;
-
-  height: 100vh;
-
-  right: 0;
-  padding: 0.5vw;
-  transition: width 2s;
-  color: white;
-  overflow-y: auto;
-  border-radius: 15px 0 0 15px;
-}

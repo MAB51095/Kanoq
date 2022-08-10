@@ -7,7 +7,7 @@ import Tailors from "../Pages/Tailors";
 
 function Content() {
   return (
-    <Container className="p-5">
+    <Container className="p-5 content">
       <Routes>
         <Route path="/Clients" element={<Clients />} />
         <Route path="/Tailors" element={<Tailors />} />

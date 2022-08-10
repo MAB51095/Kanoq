@@ -1,0 +1,33 @@
+$white: #fff;
+$theme-colors: (
+  "light": #221f11,
+  "dark": #0d1228,
+  "primary": #3f51b5,
+  "secondary": #cb2d74,
+  "info": #743197,
+  "success": #249660,
+  "warning": #dac927,
+  "danger": #d55050,
+);
+
+@import "~bootstrap/scss/bootstrap.scss";
+
+#custom-notifications,
+.custom-notifications {
+  /* box-shadow: -20px 0rem 3rem 20px rgb(0 0 0 / 18%); */
+  position: fixed;
+  z-index: 10000;
+  background-color: rgba(131, 200, 246, 0.65);
+
+  height: 100vh;
+
+  right: 0;
+  padding: 0.5vw;
+  transition: width 2s;
+  color: white;
+  overflow-y: auto;
+  border-radius: 5px 0 0 5px;
+}
+.content {
+  background: linear-gradient(0deg, #283593 30%, #f6fafd 0%);
+}
