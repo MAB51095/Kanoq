@@ -1,4 +1,5 @@
 ﻿using Kanoq.BLL;
+using Kanoq.BLL.Helper;
 using Kanoq.BLL.Interfaces;
 using Kanoq.Domain;
 using Microsoft.Ajax.Utilities;
@@ -26,16 +27,30 @@ namespace Kanoq.Api.Controllers
         [HttpGet]
         public IHttpActionResult Get()
         {
-          var tailors = TailorManager.Get();
-          return Ok(tailors);                    
+            try
+            {
+                var tailors = TailorManager.Get();
+                return Ok(tailors);
+            }
+             catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
+            }
         }
 
         [Route("get/{id}")]
         [HttpGet]
         public IHttpActionResult Get(Guid id)
-        {
-            var tailor = TailorManager.Get(id);
-            return Ok(tailor);
+        {         
+            try
+            {
+                var tailor = TailorManager.Get(id);
+                return Ok(tailor);
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
+            }
         }
                 
         [Route("insert")]
@@ -49,8 +64,9 @@ namespace Kanoq.Api.Controllers
             }
             catch(Exception ex)
             {
-                return Content(HttpStatusCode.InternalServerError, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
+
             
         }
 
@@ -65,7 +81,7 @@ namespace Kanoq.Api.Controllers
             }
             catch (Exception ex)
             {
-                return Content(HttpStatusCode.InternalServerError, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
         }
 
@@ -80,7 +96,7 @@ namespace Kanoq.Api.Controllers
             }
             catch(Exception ex)
             {
-                return Content(HttpStatusCode.BadRequest, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
         }
     }

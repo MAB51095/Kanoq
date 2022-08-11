@@ -43,8 +43,15 @@ namespace Kanoq.Api.Controllers
         [HttpGet]
         public IHttpActionResult Get(Guid id)
         {
-            var client = ClientManager.Get(id);
-            return Ok(client);
+            try
+            {
+                var client = ClientManager.Get(id);
+                return Ok(client);
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
+            }
         }
                 
         [Route("insert")]

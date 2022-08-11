@@ -1,4 +1,5 @@
 ﻿using Kanoq.BLL;
+using Kanoq.BLL.Helper;
 using Kanoq.BLL.Interfaces;
 using Kanoq.Domain;
 using Microsoft.Ajax.Utilities;
@@ -26,16 +27,30 @@ namespace Kanoq.Api.Controllers
         [HttpGet]
         public IHttpActionResult Get()
         {
-          var models = ModelManager.Get();
-          return Ok(models);                    
+            try
+            {
+                var models = ModelManager.Get();
+                return Ok(models);
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
+            }
         }
 
         [Route("get/{id}")]
         [HttpGet]
         public IHttpActionResult Get(Guid id)
-        {
-            var model = ModelManager.Get(id);
-            return Ok(model);
+        {            
+            try
+            {
+                var model = ModelManager.Get(id);
+                return Ok(model);
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
+            }
         }
                 
         [Route("insert")]
@@ -47,11 +62,11 @@ namespace Kanoq.Api.Controllers
                 model = ModelManager.Insert(model);
                 return Ok(model);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return Content(HttpStatusCode.InternalServerError, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
-            
+
         }
 
         [Route("update")]
@@ -65,7 +80,7 @@ namespace Kanoq.Api.Controllers
             }
             catch (Exception ex)
             {
-                return Content(HttpStatusCode.InternalServerError, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
         }
 
@@ -78,9 +93,9 @@ namespace Kanoq.Api.Controllers
                 ModelManager.Delete(id);
                 return Content(HttpStatusCode.OK, "Deleted");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return Content(HttpStatusCode.BadRequest, ex);
+                return Content(HttpStatusCode.InternalServerError, ExceptionHelper.GetExcpetionMessage(ex));
             }
         }
     }
