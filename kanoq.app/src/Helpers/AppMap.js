@@ -10,6 +10,7 @@ export const AppMap = {
       LOAD_LIST: "Loading clients list",
       ADD_NEW_CLIENT: "Adding new client",
       EDIT_CLIENT: "Editing client",
+      DELETE_CLIENT: "Deleting client",
     },
   },
 };

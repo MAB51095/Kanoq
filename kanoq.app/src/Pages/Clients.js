@@ -10,6 +10,8 @@ import {
   Container,
   ButtonGroup,
   Spinner,
+  Alert,
+  InputGroup,
 } from "react-bootstrap";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
@@ -17,7 +19,10 @@ import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
 import ApiClient, { uri } from "../Helpers/ApiClient";
 
 import NotificationContext from "../store/NotificationContext";
-import { CreateErrorNotification } from "../Helpers/NotificationHelper";
+import {
+  CreateErrorNotification,
+  CreateSuccessNotification,
+} from "../Helpers/NotificationHelper";
 import { AppMap } from "../Helpers/AppMap";
 import Modal from "../Components/Modal/Modal";
 
@@ -121,6 +126,7 @@ function Clients() {
 
     setTimeout(() => {
       setIsAdding(false);
+      document.getElementById("Name").focus();
     }, 500);
   };
 
@@ -180,7 +186,6 @@ function Clients() {
     const ModifyClient = async () => {
       try {
         var res = await ApiClient.post(uri.client.update, updateClientEntry);
-        console.log(res);
 
         var updateClientId = updateClientEntry.Id;
 
@@ -189,6 +194,15 @@ function Clients() {
           cl.unshift(updateClientEntry);
           return cl;
         });
+
+        ctxNotification.AddNotificationItem(
+          CreateSuccessNotification(
+            `${updateClientEntry.Name} updated`,
+            AppMap.Pages.CLIENTS,
+            AppMap.Actions.CLIENTS.EDIT_CLIENT
+          )
+        );
+
         ResetUpdateClientForm();
       } catch (e) {
         setIsUpdating(false);
@@ -211,17 +225,71 @@ function Clients() {
     }, 500);
   };
 
+  const EditClientClickHandler = (row) => {
+    setUpdateClientEntry(row);
+    ToggleUpdateClientForm(true);
+  };
   //#endregion
 
-  //#region Table Options
+  //#region Delete Client
 
-  var options = {
-    onRowClick: function (row) {
-      setUpdateClientEntry(row);
-      ToggleUpdateClientForm(true);
-    },
+  const [isDeleteWarningOpen, setIsDeleteWarningOpen] = useState(false);
+  const [deleteClientEntry, setDeleteClientEntry] = useState(emptyClientEntry);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const DeleteClientClickHandler = (row) => {
+    setDeleteClientEntry(row);
+    setIsDeleteWarningOpen(true);
   };
 
+  const ResetDeleteClientWarning = () => {
+    setIsDeleteWarningOpen(false);
+    setDeleteClientEntry(emptyClientEntry);
+    setIsDeleting(false);
+  };
+
+  const YesDelete = () => {
+    setIsDeleting(true);
+
+    const RemoveClient = async () => {
+      try {
+        var deleteClientId = deleteClientEntry.Id;
+        var res = await ApiClient.post(
+          uri.client.delete + `/${deleteClientId}`
+        );
+
+        setClients((prev) => {
+          var cl = prev.filter((c) => c.Id !== deleteClientId);
+
+          return cl;
+        });
+
+        ctxNotification.AddNotificationItem(
+          CreateSuccessNotification(
+            `${deleteClientEntry.Name} removed`,
+            AppMap.Pages.CLIENTS,
+            AppMap.Actions.CLIENTS.DELETE_CLIENT
+          )
+        );
+
+        ResetDeleteClientWarning();
+      } catch (e) {
+        setIsDeleting(false);
+        ctxNotification.AddNotificationItem(
+          CreateErrorNotification(
+            e,
+            AppMap.Pages.CLIENTS,
+            AppMap.Actions.CLIENTS.DELETE_CLIENT
+          )
+        );
+      }
+    };
+
+    RemoveClient();
+    setTimeout(() => {
+      setIsDeleting(false);
+    }, 2000);
+  };
   //#endregion
 
   return (
@@ -333,101 +401,166 @@ function Clients() {
         </Card>
       </Collapse>
 
-      <Modal visible={isUpdateClientFormOpen}>
-        <Card style={{ textAlign: "left" }} className="shadow-lg">
-          <Card.Header as="h5">Edit Client</Card.Header>
+      <Modal visible={isUpdateClientFormOpen || isDeleteWarningOpen}>
+        {isUpdateClientFormOpen && (
+          <Card style={{ textAlign: "left" }} className="shadow-lg">
+            <Card.Header as="h5">Edit Client</Card.Header>
 
-          <Card.Body>
-            <Form
-              id="updateClientForm"
-              onSubmit={UpdateClient}
-              noValidate
-              validated={isUpdateClientFormValidated}
-              className=""
-              style={{ minWidth: "300px" }}
-            >
+            <Card.Body>
+              <Form
+                id="updateClientForm"
+                onSubmit={UpdateClient}
+                noValidate
+                validated={isUpdateClientFormValidated}
+                className=""
+                style={{ minWidth: "300px" }}
+              >
+                <Form.Group className="p-1" controlId="Name">
+                  <Form.Label>Name</Form.Label>
+
+                  <Form.Control
+                    stype="text"
+                    placeholder="Name"
+                    value={updateClientEntry.Name}
+                    onChange={onUpdateFormChangeHandler}
+                    required
+                    disabled={isUpdating}
+                  />
+                  <Form.Control.Feedback type="invalid" align="left">
+                    * Mandatory
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group className="p-1" controlId="Email">
+                  <Form.Label>Email</Form.Label>
+
+                  <Form.Control
+                    type="email"
+                    placeholder="Email"
+                    value={updateClientEntry.Email}
+                    onChange={onUpdateFormChangeHandler}
+                    disabled={isUpdating}
+                  />
+                  <Form.Control.Feedback type="invalid" align="left">
+                    Enter Valid Email Id
+                  </Form.Control.Feedback>
+                </Form.Group>
+
+                <Form.Group className="p-1" controlId="PhoneNumber">
+                  <Form.Label>Phone</Form.Label>
+
+                  <Form.Control
+                    type="number"
+                    placeholder="Phone Number"
+                    value={updateClientEntry.PhoneNumber}
+                    onChange={onUpdateFormChangeHandler}
+                    //id="PhoneNumber"
+                    min={1000000000}
+                    max={9999999999}
+                    disabled={isUpdating}
+                  />
+                  <Form.Control.Feedback type="invalid" align="left">
+                    Enter Valid Phone Number
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <hr></hr>
+                <Form.Group className="m-1">
+                  <ButtonGroup>
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      className="m-1 shadow-lg"
+                      disabled={isUpdating}
+                    >
+                      {isUpdating && (
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                      )}
+                      Update
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      type="reset"
+                      onClick={() => ResetUpdateClientForm(false)}
+                      className="m-1 shadow-lg"
+                      hidden={isUpdating}
+                    >
+                      Cancel
+                    </Button>
+                  </ButtonGroup>
+                </Form.Group>
+              </Form>
+            </Card.Body>
+          </Card>
+        )}
+
+        {isDeleteWarningOpen && (
+          <Alert variant="secondary">
+            <Alert.Heading>Client Deletion Warning!</Alert.Heading>
+            <hr />
+            <Container fluid align={"left"}>
               <Form.Group className="p-1" controlId="Name">
                 <Form.Label>Name</Form.Label>
-
                 <Form.Control
-                  stype="text"
-                  placeholder="Name"
-                  value={updateClientEntry.Name}
-                  onChange={onUpdateFormChangeHandler}
-                  required
-                  disabled={isUpdating}
+                  type="text"
+                  value={deleteClientEntry.Name}
+                  disabled
                 />
-                <Form.Control.Feedback type="invalid" align="left">
-                  * Mandatory
-                </Form.Control.Feedback>
               </Form.Group>
 
-              <Form.Group className="p-1" controlId="Email">
+              <Form.Group className="p-1" controlId="Name">
                 <Form.Label>Email</Form.Label>
-
                 <Form.Control
                   type="email"
-                  placeholder="Email"
-                  value={updateClientEntry.Email}
-                  onChange={onUpdateFormChangeHandler}
-                  disabled={isUpdating}
+                  value={deleteClientEntry.Email}
+                  disabled
                 />
-                <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Email Id
-                </Form.Control.Feedback>
               </Form.Group>
-
-              <Form.Group className="p-1" controlId="PhoneNumber">
+              <Form.Group className="p-1" controlId="Name">
                 <Form.Label>Phone</Form.Label>
-
                 <Form.Control
                   type="number"
-                  placeholder="Phone Number"
-                  value={updateClientEntry.PhoneNumber}
-                  onChange={onUpdateFormChangeHandler}
-                  //id="PhoneNumber"
-                  min={1000000000}
-                  max={9999999999}
-                  disabled={isUpdating}
+                  value={deleteClientEntry.PhoneNumber}
+                  disabled
                 />
-                <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Phone Number
-                </Form.Control.Feedback>
               </Form.Group>
-              <hr></hr>
-              <Form.Group className="m-1">
-                <ButtonGroup>
-                  <Button
-                    variant="primary"
-                    type="submit"
-                    className="m-1 shadow-lg"
-                    disabled={isUpdating}
-                  >
-                    {isUpdating && (
-                      <Spinner
-                        as="span"
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                      />
-                    )}
-                    Update
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    type="reset"
-                    onClick={() => ResetUpdateClientForm(false)}
-                    className="m-1 shadow-lg"
-                    hidden={isUpdating}
-                  >
-                    Cancel
-                  </Button>
-                </ButtonGroup>
-              </Form.Group>
-            </Form>
-          </Card.Body>
-        </Card>
+            </Container>
+            <hr />
+            <p className="mb-0">Are you sure you want to delete?</p>
+            <ButtonGroup>
+              <Button
+                variant="danger"
+                className="m-1 shadow-lg"
+                onClick={YesDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting && (
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />
+                )}
+                Yes
+              </Button>
+              <Button
+                variant="primary"
+                className="m-1 shadow-lg"
+                onClick={() => setIsDeleteWarningOpen(false)}
+                disabled={isDeleting}
+              >
+                No
+              </Button>
+            </ButtonGroup>
+          </Alert>
+        )}
       </Modal>
 
       <Card className="p-3 mt-1 shadow-lg">
@@ -449,8 +582,8 @@ function Clients() {
             striped
             hover
             bordered
-            options={options}
             pagination={true}
+            condensed
           >
             <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
               Id
@@ -464,7 +597,6 @@ function Clients() {
             >
               Name
             </TableHeaderColumn>
-
             <TableHeaderColumn
               dataField="Email"
               dataSort
@@ -479,6 +611,27 @@ function Clients() {
             >
               Phone Number
             </TableHeaderColumn>
+            <TableHeaderColumn
+              dataField="actions"
+              dataFormat={(c, r) => (
+                <>
+                  <Button
+                    variant="primary"
+                    className="m-1 shadow-lg"
+                    onClick={() => EditClientClickHandler(r)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    className="m-1 shadow-lg"
+                    onClick={() => DeleteClientClickHandler(r)}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+            ></TableHeaderColumn>
           </BootstrapTable>
         )}
       </Card>

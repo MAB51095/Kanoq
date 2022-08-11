@@ -7,6 +7,7 @@ export const uri = {
     getAll: "client/get",
     insert: "client/insert",
     update: "client/update",
+    delete: "client/delete",
   },
 };
 

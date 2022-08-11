@@ -16,7 +16,7 @@ export const NotificationContextProvider = (props) => {
 
   const AddNotificationItem = (notificationItem) => {
     setNotificationItems((prev) => {
-      return [...prev, notificationItem];
+      return [notificationItem, ...prev];
     });
   };
 
