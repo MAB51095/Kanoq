@@ -9,6 +9,18 @@ export const uri = {
     update: "client/update",
     delete: "client/delete",
   },
+  tailor: {
+    getAll: "tailor/get",
+    insert: "tailor/insert",
+    update: "tailor/update",
+    delete: "tailor/delete",
+  },
+  product: {
+    getAll: "model/get",
+    insert: "model/insert",
+    update: "model/update",
+    delete: "model/delete",
+  },
 };
 
 const ApiClient = axios.create({ baseURL });

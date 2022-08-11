@@ -4,7 +4,7 @@ export const CreateErrorNotification = (error, page, action) => {
     bg: "danger",
     Page: `${page} - page.`,
     Action: `${action} - failed.`,
-    Message: error.response.data.Message,
+    Message: error?.response?.data?.Message ?? error.message,
   };
 
   return item;

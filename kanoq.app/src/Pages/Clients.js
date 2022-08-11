@@ -588,27 +588,13 @@ function Clients() {
             <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
               Id
             </TableHeaderColumn>
-            <TableHeaderColumn
-              dataField="Name"
-              dataSort
-              editable={{ type: "text" }}
-              editColumnClassName="editing-jobsname-class"
-              invalidEditColumnClassName="invalid-jobsname-class"
-            >
+            <TableHeaderColumn dataField="Name" dataSort>
               Name
             </TableHeaderColumn>
-            <TableHeaderColumn
-              dataField="Email"
-              dataSort
-              editable={{ type: "email" }}
-            >
+            <TableHeaderColumn dataField="Email" dataSort>
               Email
             </TableHeaderColumn>
-            <TableHeaderColumn
-              dataField="PhoneNumber"
-              dataSort
-              editable={{ type: "number" }}
-            >
+            <TableHeaderColumn dataField="PhoneNumber" dataSort>
               Phone Number
             </TableHeaderColumn>
             <TableHeaderColumn
