@@ -8,7 +8,7 @@ import Tailors from "../Pages/Tailors";
 function Content() {
   return (
     <Container
-      className="p-5 content"
+      className="content"
       style={{ minHeight: "100vh", minWidth: "100vw" }}
     >
       <Routes>

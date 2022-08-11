@@ -30,4 +30,11 @@ $theme-colors: (
 }
 .content {
   background: linear-gradient(0deg, #283593 30%, #f6fafd 0%);
+  padding: $spacer * 3;
+}
+
+@media (max-width: 500px) {
+  .content {
+    padding: $spacer * 1;
+  }
 }
