@@ -9,7 +9,7 @@ function Header() {
       variant="dark"
       className="sticky-top shadow-lg"
     >
-      <Container>
+      <Container fluid>
         <Navbar.Brand href="#home">Kanoq</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">

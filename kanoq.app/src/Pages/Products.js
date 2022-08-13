@@ -294,7 +294,7 @@ function Products() {
 
   return (
     <>
-      <Container>
+      <Container fluid>
         <Row>
           <Col align="left">
             <h1>Products</h1>
@@ -308,7 +308,6 @@ function Products() {
             </Button>
           </Col>
         </Row>
-        <Row></Row>
       </Container>
 
       <Collapse in={isAddProductFormOpen} dimension="height">
@@ -322,7 +321,7 @@ function Products() {
             <Row>
               <Form.Group className="m-1" controlId="Name" as={Col} md="3">
                 <Form.Control
-                  stype="text"
+                  type="text"
                   placeholder="Name"
                   value={addProductEntry.Name}
                   onChange={onAddFormChangeHandler}
@@ -387,7 +386,7 @@ function Products() {
                   <Form.Label>Name</Form.Label>
 
                   <Form.Control
-                    stype="text"
+                    type="text"
                     placeholder="Name"
                     value={updateProductEntry.Name}
                     onChange={onUpdateFormChangeHandler}
@@ -516,6 +515,7 @@ function Products() {
               dataFormat={(c, r) => (
                 <>
                   <Button
+                    size="sm"
                     variant="primary"
                     className="m-1 shadow-lg"
                     onClick={() => EditProductClickHandler(r)}
@@ -523,6 +523,7 @@ function Products() {
                     Edit
                   </Button>
                   <Button
+                    size="sm"
                     variant="danger"
                     className="m-1 shadow-lg"
                     onClick={() => DeleteProductClickHandler(r)}

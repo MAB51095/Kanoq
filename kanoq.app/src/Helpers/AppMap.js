@@ -24,5 +24,11 @@ export const AppMap = {
       EDIT_PRODUCT: "Editing product",
       DELETE_PRODUCT: "Deleting product",
     },
+    INCOME: {
+      LOAD_LIST: "Loading income list",
+      ADD_NEW_PRODUCT: "Adding new income",
+      EDIT_PRODUCT: "Editing income",
+      DELETE_PRODUCT: "Deleting income",
+    },
   },
 };

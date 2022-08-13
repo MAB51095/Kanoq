@@ -294,7 +294,7 @@ function Clients() {
 
   return (
     <>
-      <Container>
+      <Container fluid>
         <Row>
           <Col align="left">
             <h1>Clients</h1>
@@ -308,7 +308,6 @@ function Clients() {
             </Button>
           </Col>
         </Row>
-        <Row></Row>
       </Container>
 
       <Collapse in={isAddClientFormOpen} dimension="height">
@@ -322,7 +321,7 @@ function Clients() {
             <Row>
               <Form.Group className="m-1" controlId="Name" as={Col} md="3">
                 <Form.Control
-                  stype="text"
+                  type="text"
                   placeholder="Name"
                   value={addClientEntry.Name}
                   onChange={onAddFormChangeHandler}
@@ -419,7 +418,7 @@ function Clients() {
                   <Form.Label>Name</Form.Label>
 
                   <Form.Control
-                    stype="text"
+                    type="text"
                     placeholder="Name"
                     value={updateClientEntry.Name}
                     onChange={onUpdateFormChangeHandler}
@@ -584,6 +583,7 @@ function Clients() {
             bordered
             pagination={true}
             condensed
+            stickyHeader
           >
             <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
               Id
@@ -602,6 +602,7 @@ function Clients() {
               dataFormat={(c, r) => (
                 <>
                   <Button
+                    size="sm"
                     variant="primary"
                     className="m-1 shadow-lg"
                     onClick={() => EditClientClickHandler(r)}
@@ -609,6 +610,7 @@ function Clients() {
                     Edit
                   </Button>
                   <Button
+                    size="sm"
                     variant="danger"
                     className="m-1 shadow-lg"
                     onClick={() => DeleteClientClickHandler(r)}

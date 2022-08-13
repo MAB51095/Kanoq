@@ -294,7 +294,7 @@ function Tailors() {
 
   return (
     <>
-      <Container>
+      <Container fluid>
         <Row>
           <Col align="left">
             <h1>Tailors</h1>
@@ -308,7 +308,6 @@ function Tailors() {
             </Button>
           </Col>
         </Row>
-        <Row></Row>
       </Container>
 
       <Collapse in={isAddTailorFormOpen} dimension="height">
@@ -322,7 +321,7 @@ function Tailors() {
             <Row>
               <Form.Group className="m-1" controlId="Name" as={Col} md="3">
                 <Form.Control
-                  stype="text"
+                  type="text"
                   placeholder="Name"
                   value={addTailorEntry.Name}
                   onChange={onAddFormChangeHandler}
@@ -419,7 +418,7 @@ function Tailors() {
                   <Form.Label>Name</Form.Label>
 
                   <Form.Control
-                    stype="text"
+                    type="text"
                     placeholder="Name"
                     value={updateTailorEntry.Name}
                     onChange={onUpdateFormChangeHandler}
@@ -602,6 +601,7 @@ function Tailors() {
               dataFormat={(c, r) => (
                 <>
                   <Button
+                    size="sm"
                     variant="primary"
                     className="m-1 shadow-lg"
                     onClick={() => EditTailorClickHandler(r)}
@@ -609,6 +609,7 @@ function Tailors() {
                     Edit
                   </Button>
                   <Button
+                    size="sm"
                     variant="danger"
                     className="m-1 shadow-lg"
                     onClick={() => DeleteTailorClickHandler(r)}
