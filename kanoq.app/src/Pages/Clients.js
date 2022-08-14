@@ -25,6 +25,7 @@ import {
 } from "../Helpers/NotificationHelper";
 import { AppMap } from "../Helpers/AppMap";
 import Modal from "../Components/Modal/Modal";
+import ValidationHelper from "../Helpers/ValidationHelper";
 
 function Clients() {
   const ctxNotification = useContext(NotificationContext);
@@ -65,14 +66,40 @@ function Clients() {
     PhoneNumber: "",
   };
 
-  const [addClientEntry, setAddClientEntry] = useState(emptyClientEntry);
+  const nullClientEntry = {
+    Name: null,
+    Email: null,
+    PhoneNumber: null,
+  };
+
+  const [addClientEntry, setAddClientEntry] = useState(nullClientEntry);
 
   const [isAddClientFormOpen, setIsAddClientFormOpen] = useState(false);
 
   const [isAdding, setIsAdding] = useState(false);
 
-  const [isAddClientFormValidated, setIsAddClientFormValidated] =
-    useState(false);
+  // const [isAddClientFormValidated, setIsAddClientFormValidated] =
+  //   useState(false);
+
+  const [addFormValidationErrors, setAddFormValidationErrors] =
+    useState(nullClientEntry);
+  const [isFormInValid, setIsFormValid] = useState(null);
+
+  const ValidateAddForm = () => {
+    let Name = ValidationHelper.Validate_Name(addClientEntry.Name, true);
+    let Email = ValidationHelper.Validate_Email(addClientEntry.Email);
+    let PhoneNumber = ValidationHelper.Validate_PhoneNumber(
+      addClientEntry.PhoneNumber
+    );
+    let result = {
+      Name,
+      Email,
+      PhoneNumber,
+    };
+    setAddFormValidationErrors(result);
+
+    setIsFormValid(Object.keys(result).some((k) => result[k]?.length > 0));
+  };
 
   const ToggleAddClientForm = (val) => {
     if (val) {
@@ -88,17 +115,26 @@ function Clients() {
     });
   };
 
+  useEffect(() => {
+    ValidateAddForm();
+  }, [addClientEntry]);
+
+  const ResetAddClientForm = () => {
+    setAddClientEntry(nullClientEntry);
+    //ToggleAddClientForm(false);
+    setAddFormValidationErrors(nullClientEntry);
+    setIsAdding(false);
+  };
+
   const AddClient = (event) => {
     event.preventDefault();
     setIsAdding(true);
 
-    const isFormValid = event.currentTarget.checkValidity();
-
-    if (isFormValid === false) {
+    if (isFormInValid) {
       event.stopPropagation();
     }
 
-    setIsAddClientFormValidated(true);
+    //setIsAddClientFormValidated(true);
 
     const InsertClient = async () => {
       try {
@@ -118,23 +154,16 @@ function Clients() {
       }
     };
 
-    if (isFormValid) {
+    if (!isFormInValid) {
       InsertClient(addClientEntry);
-      setAddClientEntry(emptyClientEntry);
-      setIsAddClientFormValidated(false);
+      ResetAddClientForm();
     }
 
     setTimeout(() => {
       setIsAdding(false);
+      //setAddClientEntry(emptyClientEntry);
       document.getElementById("Name").focus();
     }, 500);
-  };
-
-  const ResetAddClientForm = () => {
-    setAddClientEntry(emptyClientEntry);
-    ToggleAddClientForm(false);
-    setIsAddClientFormValidated(false);
-    setIsAdding(false);
   };
   //#endregion
 
@@ -315,8 +344,8 @@ function Clients() {
           <Form
             id="addClientForm"
             onSubmit={AddClient}
-            noValidate
-            validated={isAddClientFormValidated}
+            //noValidate
+            // validated={isAddClientFormValidated}
           >
             <Row>
               <Form.Group className="m-1" controlId="Name" as={Col} md="3">
@@ -327,6 +356,9 @@ function Clients() {
                   onChange={onAddFormChangeHandler}
                   required
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors?.Name
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
                   * Mandatory
@@ -339,6 +371,9 @@ function Clients() {
                   value={addClientEntry.Email}
                   onChange={onAddFormChangeHandler}
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors?.Email
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
                   Enter Valid Email Id
@@ -360,6 +395,9 @@ function Clients() {
                   min={1000000000}
                   max={9999999999}
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors?.PhoneNumber
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
                   Enter Valid Phone Number
