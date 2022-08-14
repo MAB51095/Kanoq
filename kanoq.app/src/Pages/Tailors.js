@@ -11,7 +11,6 @@ import {
   ButtonGroup,
   Spinner,
   Alert,
-  InputGroup,
 } from "react-bootstrap";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
@@ -25,9 +24,38 @@ import {
 } from "../Helpers/NotificationHelper";
 import { AppMap } from "../Helpers/AppMap";
 import Modal from "../Components/Modal/Modal";
+import ValidationHelper from "../Helpers/ValidationHelper";
 
 function Tailors() {
   const ctxNotification = useContext(NotificationContext);
+
+  //#region Helpers
+  const emptyTailorEntry = {
+    Name: "",
+    Email: "",
+    PhoneNumber: "",
+  };
+
+  const nullTailorEntry = {
+    Name: null,
+    Email: null,
+    PhoneNumber: null,
+  };
+
+  const ValidateForm = (inputs) => {
+    let isFormValid = false;
+
+    let Name = ValidationHelper.Validate_Name(inputs.Name);
+    let Email = ValidationHelper.Validate_Email(inputs.Email);
+    let PhoneNumber = ValidationHelper.Validate_PhoneNumber(inputs.PhoneNumber);
+
+    let errors = { Name, Email, PhoneNumber };
+
+    isFormValid = !Object.keys(errors).some((k) => errors[k].length > 0);
+
+    return { isFormValid, errors };
+  };
+  //#endregion
 
   //#region Tailor List
 
@@ -59,20 +87,14 @@ function Tailors() {
 
   //#region Add Tailor Form
 
-  const emptyTailorEntry = {
-    Name: "",
-    Email: "",
-    PhoneNumber: "",
-  };
-
   const [addTailorEntry, setAddTailorEntry] = useState(emptyTailorEntry);
 
   const [isAddTailorFormOpen, setIsAddTailorFormOpen] = useState(false);
 
   const [isAdding, setIsAdding] = useState(false);
 
-  const [isAddTailorFormValidated, setIsAddTailorFormValidated] =
-    useState(false);
+  const [addFormValidationErrors, setAddFormValidationErrors] =
+    useState(nullTailorEntry);
 
   const ToggleAddTailorForm = (val) => {
     if (val) {
@@ -92,14 +114,6 @@ function Tailors() {
     event.preventDefault();
     setIsAdding(true);
 
-    const isFormValid = event.currentTarget.checkValidity();
-
-    if (isFormValid === false) {
-      event.stopPropagation();
-    }
-
-    setIsAddTailorFormValidated(true);
-
     const InsertTailor = async () => {
       try {
         var res = await ApiClient.post(uri.tailor.insert, addTailorEntry);
@@ -118,10 +132,15 @@ function Tailors() {
       }
     };
 
-    if (isFormValid) {
+    const { isFormValid, errors } = ValidateForm(addTailorEntry);
+
+    if (!isFormValid) {
+      event.stopPropagation();
+      setAddFormValidationErrors(errors);
+    } else {
       InsertTailor(addTailorEntry);
       setAddTailorEntry(emptyTailorEntry);
-      setIsAddTailorFormValidated(false);
+      setAddFormValidationErrors(nullTailorEntry);
     }
 
     setTimeout(() => {
@@ -131,9 +150,9 @@ function Tailors() {
   };
 
   const ResetAddTailorForm = () => {
+    //ToggleAddTailorForm(false);
     setAddTailorEntry(emptyTailorEntry);
-    ToggleAddTailorForm(false);
-    setIsAddTailorFormValidated(false);
+    setAddFormValidationErrors(nullTailorEntry);
     setIsAdding(false);
   };
   //#endregion
@@ -146,8 +165,8 @@ function Tailors() {
 
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [isUpdateTailorFormValidated, setIsUpdateTailorFormValidated] =
-    useState(false);
+  const [updateFormValidationErrors, setUpdateFormValidationErrors] =
+    useState(nullTailorEntry);
 
   const ToggleUpdateTailorForm = (val) => {
     if (val) {
@@ -166,26 +185,17 @@ function Tailors() {
   const ResetUpdateTailorForm = () => {
     setUpdateTailorEntry(emptyTailorEntry);
     ToggleUpdateTailorForm(false);
-    setIsUpdateTailorFormValidated(false);
+    setUpdateFormValidationErrors(nullTailorEntry);
     setIsUpdating(false);
   };
 
   const UpdateTailor = (event) => {
     event.preventDefault();
-    setIsUpdateTailorFormValidated(false);
     setIsUpdating(true);
-
-    const isFormValid = event.currentTarget.checkValidity();
-
-    if (isFormValid === false) {
-      event.stopPropagation();
-    }
-
-    setIsUpdateTailorFormValidated(true);
 
     const ModifyTailor = async () => {
       try {
-        var res = await ApiClient.post(uri.tailor.update, updateTailorEntry);
+        await ApiClient.post(uri.tailor.update, updateTailorEntry);
 
         var updateTailorId = updateTailorEntry.Id;
 
@@ -216,7 +226,12 @@ function Tailors() {
       }
     };
 
-    if (isFormValid) {
+    const { isFormValid, errors } = ValidateForm(updateTailorEntry);
+
+    if (!isFormValid) {
+      event.stopPropagation();
+      setUpdateFormValidationErrors(errors);
+    } else {
       ModifyTailor();
     }
 
@@ -254,9 +269,7 @@ function Tailors() {
     const RemoveTailor = async () => {
       try {
         var deleteTailorId = deleteTailorEntry.Id;
-        var res = await ApiClient.post(
-          uri.tailor.delete + `/${deleteTailorId}`
-        );
+        await ApiClient.post(uri.tailor.delete + `/${deleteTailorId}`);
 
         setTailors((prev) => {
           var cl = prev.filter((c) => c.Id !== deleteTailorId);
@@ -312,12 +325,7 @@ function Tailors() {
 
       <Collapse in={isAddTailorFormOpen} dimension="height">
         <Card className="p-3  mb-2 shadow-lg">
-          <Form
-            id="addTailorForm"
-            onSubmit={AddTailor}
-            noValidate
-            validated={isAddTailorFormValidated}
-          >
+          <Form id="addTailorForm" onSubmit={AddTailor}>
             <Row>
               <Form.Group className="m-1" controlId="Name" as={Col} md="3">
                 <Form.Control
@@ -327,9 +335,12 @@ function Tailors() {
                   onChange={onAddFormChangeHandler}
                   required
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors.Name
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
-                  * Mandatory
+                  {addFormValidationErrors.Name}
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="m-1" controlId="Email" as={Col} md="3">
@@ -339,9 +350,12 @@ function Tailors() {
                   value={addTailorEntry.Email}
                   onChange={onAddFormChangeHandler}
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors.Email
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Email Id
+                  {addFormValidationErrors.Email}
                 </Form.Control.Feedback>
               </Form.Group>
 
@@ -357,12 +371,15 @@ function Tailors() {
                   value={addTailorEntry.PhoneNumber}
                   onChange={onAddFormChangeHandler}
                   //id="PhoneNumber"
-                  min={1000000000}
-                  max={9999999999}
+                  // min={1000000000}
+                  // max={9999999999}
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors.PhoneNumber
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Phone Number
+                  {addFormValidationErrors.PhoneNumber}
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="m-1" as={Col} sm="2">
@@ -409,9 +426,6 @@ function Tailors() {
               <Form
                 id="updateTailorForm"
                 onSubmit={UpdateTailor}
-                noValidate
-                validated={isUpdateTailorFormValidated}
-                className=""
                 style={{ minWidth: "300px" }}
               >
                 <Form.Group className="p-1" controlId="Name">
@@ -424,9 +438,12 @@ function Tailors() {
                     onChange={onUpdateFormChangeHandler}
                     required
                     disabled={isUpdating}
+                    className={ValidationHelper.AssignClass(
+                      updateFormValidationErrors.Name
+                    )}
                   />
                   <Form.Control.Feedback type="invalid" align="left">
-                    * Mandatory
+                    {updateFormValidationErrors.Name}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -439,9 +456,12 @@ function Tailors() {
                     value={updateTailorEntry.Email}
                     onChange={onUpdateFormChangeHandler}
                     disabled={isUpdating}
+                    className={ValidationHelper.AssignClass(
+                      updateFormValidationErrors.Email
+                    )}
                   />
                   <Form.Control.Feedback type="invalid" align="left">
-                    Enter Valid Email Id
+                    {updateFormValidationErrors.Email}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -454,12 +474,15 @@ function Tailors() {
                     value={updateTailorEntry.PhoneNumber}
                     onChange={onUpdateFormChangeHandler}
                     //id="PhoneNumber"
-                    min={1000000000}
-                    max={9999999999}
+                    // min={1000000000}
+                    // max={9999999999}
                     disabled={isUpdating}
+                    className={ValidationHelper.AssignClass(
+                      updateFormValidationErrors.PhoneNumber
+                    )}
                   />
                   <Form.Control.Feedback type="invalid" align="left">
-                    Enter Valid Phone Number
+                    {updateFormValidationErrors.PhoneNumber}
                   </Form.Control.Feedback>
                 </Form.Group>
                 <hr></hr>
@@ -583,6 +606,7 @@ function Tailors() {
             bordered
             pagination={true}
             condensed
+            stickyHeader
           >
             <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
               Id

@@ -11,7 +11,6 @@ import {
   ButtonGroup,
   Spinner,
   Alert,
-  InputGroup,
 } from "react-bootstrap";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
@@ -25,9 +24,32 @@ import {
 } from "../Helpers/NotificationHelper";
 import { AppMap } from "../Helpers/AppMap";
 import Modal from "../Components/Modal/Modal";
+import ValidationHelper from "../Helpers/ValidationHelper";
 
 function Products() {
   const ctxNotification = useContext(NotificationContext);
+
+  //#region Helpers
+  const emptyProductEntry = {
+    Name: "",
+  };
+
+  const nullProductEntry = {
+    Name: null,
+  };
+
+  const ValidateForm = (inputs) => {
+    let isFormValid = false;
+
+    let Name = ValidationHelper.Validate_Name(inputs.Name);
+
+    let errors = { Name };
+
+    isFormValid = !Object.keys(errors).some((k) => errors[k].length > 0);
+
+    return { isFormValid, errors };
+  };
+  //#endregion
 
   //#region Product List
 
@@ -59,18 +81,14 @@ function Products() {
 
   //#region Add Product Form
 
-  const emptyProductEntry = {
-    Name: "",
-  };
-
   const [addProductEntry, setAddProductEntry] = useState(emptyProductEntry);
 
   const [isAddProductFormOpen, setIsAddProductFormOpen] = useState(false);
 
   const [isAdding, setIsAdding] = useState(false);
 
-  const [isAddProductFormValidated, setIsAddProductFormValidated] =
-    useState(false);
+  const [addFormValidationErrors, setAddFormValidationErrors] =
+    useState(nullProductEntry);
 
   const ToggleAddProductForm = (val) => {
     if (val) {
@@ -90,14 +108,6 @@ function Products() {
     event.preventDefault();
     setIsAdding(true);
 
-    const isFormValid = event.currentTarget.checkValidity();
-
-    if (isFormValid === false) {
-      event.stopPropagation();
-    }
-
-    setIsAddProductFormValidated(true);
-
     const InsertProduct = async () => {
       try {
         var res = await ApiClient.post(uri.product.insert, addProductEntry);
@@ -116,10 +126,15 @@ function Products() {
       }
     };
 
-    if (isFormValid) {
+    const { isFormValid, errors } = ValidateForm(addProductEntry);
+
+    if (!isFormValid) {
+      event.stopPropagation();
+      setAddFormValidationErrors(errors);
+    } else {
       InsertProduct(addProductEntry);
       setAddProductEntry(emptyProductEntry);
-      setIsAddProductFormValidated(false);
+      setAddFormValidationErrors(nullProductEntry);
     }
 
     setTimeout(() => {
@@ -129,9 +144,9 @@ function Products() {
   };
 
   const ResetAddProductForm = () => {
+    //ToggleAddProductForm(false);
     setAddProductEntry(emptyProductEntry);
-    ToggleAddProductForm(false);
-    setIsAddProductFormValidated(false);
+    setAddFormValidationErrors(nullProductEntry);
     setIsAdding(false);
   };
   //#endregion
@@ -145,8 +160,8 @@ function Products() {
 
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [isUpdateProductFormValidated, setIsUpdateProductFormValidated] =
-    useState(false);
+  const [updateFormValidationErrors, setUpdateFormValidationErrors] =
+    useState(nullProductEntry);
 
   const ToggleUpdateProductForm = (val) => {
     if (val) {
@@ -165,26 +180,17 @@ function Products() {
   const ResetUpdateProductForm = () => {
     setUpdateProductEntry(emptyProductEntry);
     ToggleUpdateProductForm(false);
-    setIsUpdateProductFormValidated(false);
+    setUpdateFormValidationErrors(nullProductEntry);
     setIsUpdating(false);
   };
 
   const UpdateProduct = (event) => {
     event.preventDefault();
-    setIsUpdateProductFormValidated(false);
     setIsUpdating(true);
-
-    const isFormValid = event.currentTarget.checkValidity();
-
-    if (isFormValid === false) {
-      event.stopPropagation();
-    }
-
-    setIsUpdateProductFormValidated(true);
 
     const ModifyProduct = async () => {
       try {
-        var res = await ApiClient.post(uri.product.update, updateProductEntry);
+        await ApiClient.post(uri.product.update, updateProductEntry);
 
         var updateProductId = updateProductEntry.Id;
 
@@ -215,7 +221,12 @@ function Products() {
       }
     };
 
-    if (isFormValid) {
+    const { isFormValid, errors } = ValidateForm(updateProductEntry);
+
+    if (!isFormValid) {
+      event.stopPropagation();
+      setUpdateFormValidationErrors(errors);
+    } else {
       ModifyProduct();
     }
 
@@ -254,9 +265,7 @@ function Products() {
     const RemoveProduct = async () => {
       try {
         var deleteProductId = deleteProductEntry.Id;
-        var res = await ApiClient.post(
-          uri.product.delete + `/${deleteProductId}`
-        );
+        await ApiClient.post(uri.product.delete + `/${deleteProductId}`);
 
         setProducts((prev) => {
           var cl = prev.filter((c) => c.Id !== deleteProductId);
@@ -312,12 +321,7 @@ function Products() {
 
       <Collapse in={isAddProductFormOpen} dimension="height">
         <Card className="p-3  mb-2 shadow-lg">
-          <Form
-            id="addProductForm"
-            onSubmit={AddProduct}
-            noValidate
-            validated={isAddProductFormValidated}
-          >
+          <Form id="addProductForm" onSubmit={AddProduct}>
             <Row>
               <Form.Group className="m-1" controlId="Name" as={Col} md="3">
                 <Form.Control
@@ -327,9 +331,12 @@ function Products() {
                   onChange={onAddFormChangeHandler}
                   required
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors.Name
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
-                  * Mandatory
+                  {addFormValidationErrors.Name}
                 </Form.Control.Feedback>
               </Form.Group>
 
@@ -377,9 +384,6 @@ function Products() {
               <Form
                 id="updateProductForm"
                 onSubmit={UpdateProduct}
-                noValidate
-                validated={isUpdateProductFormValidated}
-                className=""
                 style={{ minWidth: "300px" }}
               >
                 <Form.Group className="p-1" controlId="Name">
@@ -392,9 +396,12 @@ function Products() {
                     onChange={onUpdateFormChangeHandler}
                     required
                     disabled={isUpdating}
+                    className={ValidationHelper.AssignClass(
+                      updateFormValidationErrors.Name
+                    )}
                   />
                   <Form.Control.Feedback type="invalid" align="left">
-                    * Mandatory
+                    {updateFormValidationErrors.Name}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -502,6 +509,7 @@ function Products() {
             bordered
             pagination={true}
             condensed
+            stickyHeader
           >
             <TableHeaderColumn dataField="Id" isKey={true} dataSort hidden>
               Id
@@ -509,7 +517,6 @@ function Products() {
             <TableHeaderColumn dataField="Name" dataSort>
               Name
             </TableHeaderColumn>
-
             <TableHeaderColumn
               dataField="actions"
               dataFormat={(c, r) => (

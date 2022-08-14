@@ -21,7 +21,7 @@ const Validate_Email = (val, required) => {
     else return "";
   }
   let pattern = /^[a-zA-Z0-9._]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9]+$/;
-
+  if (val.length > 100) return "Max Length 100 reached";
   if (!pattern.test(val)) return "Invalid Email Format";
   return "";
 };
@@ -32,7 +32,7 @@ const Validate_PhoneNumber = (val, required) => {
     if (required) return "* Mandatory";
     else return "";
   }
-  let pattern = /^(\d){10,11}$/;
+  let pattern = /^(\d){10}$/;
 
   if (!pattern.test(val)) return "Invalid Number";
   return "";

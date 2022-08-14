@@ -10,7 +10,13 @@ function NotificationItem(props) {
   };
 
   return (
-    <Toast onClose={toggleShowA} bg={props.notify.bg} className="m-1 p-1">
+    <Toast
+      onClose={toggleShowA}
+      bg={props.notify.bg}
+      className="m-1 p-1"
+      onClick={toggleShowA}
+      style={{ cursor: "pointer" }}
+    >
       <Toast.Header>
         <strong className="m-auto">{props.notify.Page}</strong>
       </Toast.Header>

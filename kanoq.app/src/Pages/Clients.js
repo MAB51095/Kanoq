@@ -11,7 +11,6 @@ import {
   ButtonGroup,
   Spinner,
   Alert,
-  InputGroup,
 } from "react-bootstrap";
 
 import { BootstrapTable, TableHeaderColumn } from "react-bootstrap-table";
@@ -25,9 +24,38 @@ import {
 } from "../Helpers/NotificationHelper";
 import { AppMap } from "../Helpers/AppMap";
 import Modal from "../Components/Modal/Modal";
+import ValidationHelper from "../Helpers/ValidationHelper";
 
 function Clients() {
   const ctxNotification = useContext(NotificationContext);
+
+  //#region Helpers
+  const emptyClientEntry = {
+    Name: "",
+    Email: "",
+    PhoneNumber: "",
+  };
+
+  const nullClientEntry = {
+    Name: null,
+    Email: null,
+    PhoneNumber: null,
+  };
+
+  const ValidateForm = (inputs) => {
+    let isFormValid = false;
+
+    let Name = ValidationHelper.Validate_Name(inputs.Name);
+    let Email = ValidationHelper.Validate_Email(inputs.Email);
+    let PhoneNumber = ValidationHelper.Validate_PhoneNumber(inputs.PhoneNumber);
+
+    let errors = { Name, Email, PhoneNumber };
+
+    isFormValid = !Object.keys(errors).some((k) => errors[k].length > 0);
+
+    return { isFormValid, errors };
+  };
+  //#endregion
 
   //#region Client List
 
@@ -59,20 +87,14 @@ function Clients() {
 
   //#region Add Client Form
 
-  const emptyClientEntry = {
-    Name: "",
-    Email: "",
-    PhoneNumber: "",
-  };
-
   const [addClientEntry, setAddClientEntry] = useState(emptyClientEntry);
 
   const [isAddClientFormOpen, setIsAddClientFormOpen] = useState(false);
 
   const [isAdding, setIsAdding] = useState(false);
 
-  const [isAddClientFormValidated, setIsAddClientFormValidated] =
-    useState(false);
+  const [addFormValidationErrors, setAddFormValidationErrors] =
+    useState(nullClientEntry);
 
   const ToggleAddClientForm = (val) => {
     if (val) {
@@ -92,14 +114,6 @@ function Clients() {
     event.preventDefault();
     setIsAdding(true);
 
-    const isFormValid = event.currentTarget.checkValidity();
-
-    if (isFormValid === false) {
-      event.stopPropagation();
-    }
-
-    setIsAddClientFormValidated(true);
-
     const InsertClient = async () => {
       try {
         var res = await ApiClient.post(uri.client.insert, addClientEntry);
@@ -118,10 +132,15 @@ function Clients() {
       }
     };
 
-    if (isFormValid) {
+    const { isFormValid, errors } = ValidateForm(addClientEntry);
+
+    if (!isFormValid) {
+      event.stopPropagation();
+      setAddFormValidationErrors(errors);
+    } else {
       InsertClient(addClientEntry);
       setAddClientEntry(emptyClientEntry);
-      setIsAddClientFormValidated(false);
+      setAddFormValidationErrors(nullClientEntry);
     }
 
     setTimeout(() => {
@@ -131,9 +150,9 @@ function Clients() {
   };
 
   const ResetAddClientForm = () => {
+    //ToggleAddClientForm(false);
     setAddClientEntry(emptyClientEntry);
-    ToggleAddClientForm(false);
-    setIsAddClientFormValidated(false);
+    setAddFormValidationErrors(nullClientEntry);
     setIsAdding(false);
   };
   //#endregion
@@ -146,8 +165,8 @@ function Clients() {
 
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [isUpdateClientFormValidated, setIsUpdateClientFormValidated] =
-    useState(false);
+  const [updateFormValidationErrors, setUpdateFormValidationErrors] =
+    useState(nullClientEntry);
 
   const ToggleUpdateClientForm = (val) => {
     if (val) {
@@ -166,26 +185,17 @@ function Clients() {
   const ResetUpdateClientForm = () => {
     setUpdateClientEntry(emptyClientEntry);
     ToggleUpdateClientForm(false);
-    setIsUpdateClientFormValidated(false);
+    setUpdateFormValidationErrors(nullClientEntry);
     setIsUpdating(false);
   };
 
   const UpdateClient = (event) => {
     event.preventDefault();
-    setIsUpdateClientFormValidated(false);
     setIsUpdating(true);
-
-    const isFormValid = event.currentTarget.checkValidity();
-
-    if (isFormValid === false) {
-      event.stopPropagation();
-    }
-
-    setIsUpdateClientFormValidated(true);
 
     const ModifyClient = async () => {
       try {
-        var res = await ApiClient.post(uri.client.update, updateClientEntry);
+        await ApiClient.post(uri.client.update, updateClientEntry);
 
         var updateClientId = updateClientEntry.Id;
 
@@ -216,7 +226,12 @@ function Clients() {
       }
     };
 
-    if (isFormValid) {
+    const { isFormValid, errors } = ValidateForm(updateClientEntry);
+
+    if (!isFormValid) {
+      event.stopPropagation();
+      setUpdateFormValidationErrors(errors);
+    } else {
       ModifyClient();
     }
 
@@ -254,9 +269,7 @@ function Clients() {
     const RemoveClient = async () => {
       try {
         var deleteClientId = deleteClientEntry.Id;
-        var res = await ApiClient.post(
-          uri.client.delete + `/${deleteClientId}`
-        );
+        await ApiClient.post(uri.client.delete + `/${deleteClientId}`);
 
         setClients((prev) => {
           var cl = prev.filter((c) => c.Id !== deleteClientId);
@@ -312,12 +325,7 @@ function Clients() {
 
       <Collapse in={isAddClientFormOpen} dimension="height">
         <Card className="p-3  mb-2 shadow-lg">
-          <Form
-            id="addClientForm"
-            onSubmit={AddClient}
-            noValidate
-            validated={isAddClientFormValidated}
-          >
+          <Form id="addClientForm" onSubmit={AddClient}>
             <Row>
               <Form.Group className="m-1" controlId="Name" as={Col} md="3">
                 <Form.Control
@@ -327,9 +335,12 @@ function Clients() {
                   onChange={onAddFormChangeHandler}
                   required
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors.Name
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
-                  * Mandatory
+                  {addFormValidationErrors.Name}
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="m-1" controlId="Email" as={Col} md="3">
@@ -339,9 +350,12 @@ function Clients() {
                   value={addClientEntry.Email}
                   onChange={onAddFormChangeHandler}
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors.Email
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Email Id
+                  {addFormValidationErrors.Email}
                 </Form.Control.Feedback>
               </Form.Group>
 
@@ -357,12 +371,15 @@ function Clients() {
                   value={addClientEntry.PhoneNumber}
                   onChange={onAddFormChangeHandler}
                   //id="PhoneNumber"
-                  min={1000000000}
-                  max={9999999999}
+                  // min={1000000000}
+                  // max={9999999999}
                   disabled={isAdding}
+                  className={ValidationHelper.AssignClass(
+                    addFormValidationErrors.PhoneNumber
+                  )}
                 />
                 <Form.Control.Feedback type="invalid" align="left">
-                  Enter Valid Phone Number
+                  {addFormValidationErrors.PhoneNumber}
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="m-1" as={Col} sm="2">
@@ -409,9 +426,6 @@ function Clients() {
               <Form
                 id="updateClientForm"
                 onSubmit={UpdateClient}
-                noValidate
-                validated={isUpdateClientFormValidated}
-                className=""
                 style={{ minWidth: "300px" }}
               >
                 <Form.Group className="p-1" controlId="Name">
@@ -424,9 +438,12 @@ function Clients() {
                     onChange={onUpdateFormChangeHandler}
                     required
                     disabled={isUpdating}
+                    className={ValidationHelper.AssignClass(
+                      updateFormValidationErrors.Name
+                    )}
                   />
                   <Form.Control.Feedback type="invalid" align="left">
-                    * Mandatory
+                    {updateFormValidationErrors.Name}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -439,9 +456,12 @@ function Clients() {
                     value={updateClientEntry.Email}
                     onChange={onUpdateFormChangeHandler}
                     disabled={isUpdating}
+                    className={ValidationHelper.AssignClass(
+                      updateFormValidationErrors.Email
+                    )}
                   />
                   <Form.Control.Feedback type="invalid" align="left">
-                    Enter Valid Email Id
+                    {updateFormValidationErrors.Email}
                   </Form.Control.Feedback>
                 </Form.Group>
 
@@ -454,12 +474,15 @@ function Clients() {
                     value={updateClientEntry.PhoneNumber}
                     onChange={onUpdateFormChangeHandler}
                     //id="PhoneNumber"
-                    min={1000000000}
-                    max={9999999999}
+                    // min={1000000000}
+                    // max={9999999999}
                     disabled={isUpdating}
+                    className={ValidationHelper.AssignClass(
+                      updateFormValidationErrors.PhoneNumber
+                    )}
                   />
                   <Form.Control.Feedback type="invalid" align="left">
-                    Enter Valid Phone Number
+                    {updateFormValidationErrors.PhoneNumber}
                   </Form.Control.Feedback>
                 </Form.Group>
                 <hr></hr>
