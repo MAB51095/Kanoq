@@ -138,7 +138,7 @@ function Clients() {
       event.stopPropagation();
       setAddFormValidationErrors(errors);
     } else {
-      InsertClient(addClientEntry);
+      InsertClient();
       setAddClientEntry(emptyClientEntry);
       setAddFormValidationErrors(nullClientEntry);
     }

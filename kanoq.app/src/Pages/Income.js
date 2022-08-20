@@ -15,12 +15,48 @@ import ArrayHelper from "../Helpers/ArrayHelper";
 import { AppMap } from "../Helpers/AppMap";
 import { CreateErrorNotification } from "../Helpers/NotificationHelper";
 import NotificationContext from "../store/NotificationContext";
+import ValidationHelper from "../Helpers/ValidationHelper";
 
 function Income() {
   const ctxNotification = useContext(NotificationContext);
 
-  //#region On PageLoad
+  //#region Helpers
 
+  const emptyIncomeEntry = {
+    Client: "",
+    Amount: "",
+    ReceivedOn: "", //new Date().toISOString().split("T")[0],
+    Particulars: "",
+  };
+
+  const nullIncomeEntry = {
+    Client: null,
+    Amount: null,
+    ReceivedOn: null,
+    Particulars: null,
+  };
+
+  const ValidateForm = (inputs) => {
+    let isFormValid = false;
+
+    let Client = ValidationHelper.Validate_DropDown(inputs.Client, true);
+    let Amount = ValidationHelper.Validate_Currency(inputs.Amount, true);
+    let Particulars = ValidationHelper.Validate_Description(
+      inputs.Particulars,
+      false
+    );
+    let ReceivedOn = ValidationHelper.Validate_Date(inputs.ReceivedOn, true);
+
+    let errors = { Client, Amount, Particulars, ReceivedOn };
+
+    isFormValid = !Object.keys(errors).some((k) => errors[k].length > 0);
+
+    return { isFormValid, errors };
+  };
+  //#endregion
+
+  //#region On PageLoad
+  const [incomes, setIncomes] = useState([]);
   const [clients, setClients] = useState([]);
 
   useEffect(() => {
@@ -52,6 +88,10 @@ function Income() {
   const [isAddFormOpen, setIsAddFormOpen] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
 
+  const [addIncomeEntry, setAddIncomeEntry] = useState(emptyIncomeEntry);
+  const [addFormValidationErrors, setAddFormValidationErrors] =
+    useState(nullIncomeEntry);
+
   const ToggleAddForm = (val) => {
     if (val) {
       setIsAddFormOpen(val);
@@ -60,10 +100,39 @@ function Income() {
     setIsAddFormOpen((prev) => !prev);
   };
 
+  const onAddFormChangeHandler = (e) => {
+    setAddIncomeEntry((prev) => {
+      return { ...prev, [e.target.id]: e.target.value };
+    });
+  };
+
+  const AddNewIncome = (e) => {
+    e.preventDefault();
+
+    setIsAdding(true);
+
+    console.log(addIncomeEntry);
+
+    const { isFormValid, errors } = ValidateForm(addIncomeEntry);
+
+    if (!isFormValid) {
+      e.stopPropagation();
+      setAddFormValidationErrors(errors);
+    } else {
+      //InsertClient(addClientEntry);
+      setAddIncomeEntry(emptyIncomeEntry);
+      setAddFormValidationErrors(nullIncomeEntry);
+    }
+
+    setTimeout(() => {
+      setIsAdding(false);
+      document.getElementById("Client").focus();
+    }, 500);
+  };
+
   const ResetAddForm = () => {
-    //setAddClientEntry(emptyClientEntry);
-    ToggleAddForm(false);
-    //setIsAddClientFormValidated(false);
+    setAddIncomeEntry(emptyIncomeEntry);
+    //ToggleAddForm(false);
     setIsAdding(false);
   };
   //#endregion
@@ -88,28 +157,25 @@ function Income() {
 
       <Collapse in={isAddFormOpen} dimension="height">
         <Card className="p-3  mb-2 shadow-lg">
-          <Form
-            align="left"
-            id="addClientForm"
-            //onSubmit={AddClient}
-            noValidate
-            //validated={isAddClientFormValidated}
-          >
+          <Form align="left" id="addClientForm" onSubmit={AddNewIncome}>
             <Container fluid>
               <Row>
                 <Col>
                   <Form.Group className="m-1" controlId="Client">
                     <Form.Label>From</Form.Label>
                     <Form.Control
-                      //value={addClientEntry.Email}
-                      //onChange={onAddFormChangeHandler}
+                      value={addIncomeEntry.Client}
+                      onChange={onAddFormChangeHandler}
                       disabled={isAdding}
                       as="select"
-                      //isInvalid={true}
+                      required
+                      className={ValidationHelper.AssignClass(
+                        addFormValidationErrors.Client
+                      )}
                     >
                       <option
                         key="00000000-0000-0000-0000-000000000000"
-                        value="00000000-0000-0000-0000-000000000000"
+                        value=""
                       ></option>
                       {clients.map((c) => {
                         return (
@@ -121,7 +187,7 @@ function Income() {
                       })}
                     </Form.Control>
                     <Form.Control.Feedback type="invalid" align="left">
-                      Select a client
+                      {addFormValidationErrors.Client}
                     </Form.Control.Feedback>
                   </Form.Group>
 
@@ -131,14 +197,16 @@ function Income() {
                     <Form.Control
                       type="date"
                       placeholder="Recieved on"
-                      //value={addClientEntry.Name}
-                      //onChange={onAddFormChangeHandler}
+                      value={addIncomeEntry.ReceivedOn}
+                      onChange={onAddFormChangeHandler}
                       required
                       disabled={isAdding}
-                      //isInvalid={true}
+                      className={ValidationHelper.AssignClass(
+                        addFormValidationErrors.ReceivedOn
+                      )}
                     />
                     <Form.Control.Feedback type="invalid" align="left">
-                      * Mandatory
+                      {addFormValidationErrors.ReceivedOn}
                     </Form.Control.Feedback>
                   </Form.Group>
                 </Col>
@@ -146,32 +214,40 @@ function Income() {
                   <Form.Group className="m-1" controlId="Amount">
                     <Form.Label>Amount</Form.Label>
                     <Form.Control
-                      type="currency"
+                      type="number"
                       placeholder="Amount"
-                      //value={addClientEntry.PhoneNumber}
-                      //onChange={onAddFormChangeHandler}
+                      value={addIncomeEntry.Amount}
+                      onChange={onAddFormChangeHandler}
                       //id="PhoneNumber"
                       min={1}
                       max={9999999999}
                       disabled={isAdding}
+                      step={0.01}
+                      required
+                      className={ValidationHelper.AssignClass(
+                        addFormValidationErrors.Amount
+                      )}
                     />
                     <Form.Control.Feedback type="invalid" align="left">
-                      Enter Valid Phone Number
+                      {addFormValidationErrors.Amount}
                     </Form.Control.Feedback>
                   </Form.Group>
 
-                  <Form.Group className="m-1" controlId="Amount">
+                  <Form.Group className="m-1" controlId="Particulars">
                     <Form.Label>Particulars</Form.Label>
                     <Form.Control
                       placeholder="Particulars"
-                      //value={addClientEntry.PhoneNumber}
-                      //onChange={onAddFormChangeHandler}
+                      value={addIncomeEntry.Particulars}
+                      onChange={onAddFormChangeHandler}
                       //id="PhoneNumber"
                       as="textarea"
                       disabled={isAdding}
+                      className={ValidationHelper.AssignClass(
+                        addFormValidationErrors.Particulars
+                      )}
                     />
                     <Form.Control.Feedback type="invalid" align="left">
-                      Enter Valid Phone Number
+                      {addFormValidationErrors.Particulars}
                     </Form.Control.Feedback>
                   </Form.Group>
                 </Col>

@@ -132,7 +132,7 @@ function Products() {
       event.stopPropagation();
       setAddFormValidationErrors(errors);
     } else {
-      InsertProduct(addProductEntry);
+      InsertProduct();
       setAddProductEntry(emptyProductEntry);
       setAddFormValidationErrors(nullProductEntry);
     }

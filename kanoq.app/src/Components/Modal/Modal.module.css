@@ -3,9 +3,9 @@
   width: 100vw;
   min-height: 100vh;
 
-  /* background: linear-gradient(0deg, #4169e1 30%, #f6fafd 0%); */
+  background-color: rgba(0, 0, 0, 90%);
 
-  z-index: 20;
+  z-index: 1020;
   top: 0;
   left: 0;
   margin: 0;

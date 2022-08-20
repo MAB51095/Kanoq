@@ -138,7 +138,7 @@ function Tailors() {
       event.stopPropagation();
       setAddFormValidationErrors(errors);
     } else {
-      InsertTailor(addTailorEntry);
+      InsertTailor();
       setAddTailorEntry(emptyTailorEntry);
       setAddFormValidationErrors(nullTailorEntry);
     }
